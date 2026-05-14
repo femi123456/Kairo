@@ -5,12 +5,14 @@ import type { Note } from '../types';
 import api from '../lib/axios';
 import Sidebar from '../components/Sidebar';
 import Editor from '../components/Editor';
+import KairoAI from '../components/KairoAI';
 
 const AppLayout = () => {
   const { user } = useAuth();
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAiOpen, setIsAiOpen] = useState(false);
 
   const selectedNote = notes.find(n => n._id === selectedNoteId) || null;
 
@@ -103,6 +105,13 @@ const AppLayout = () => {
       />
       <Editor
         note={selectedNote}
+        onNoteUpdate={handleNoteUpdate}
+        onToggleAi={() => setIsAiOpen(!isAiOpen)}
+      />
+      <KairoAI
+        note={selectedNote}
+        isOpen={isAiOpen}
+        onClose={() => setIsAiOpen(false)}
         onNoteUpdate={handleNoteUpdate}
       />
     </div>

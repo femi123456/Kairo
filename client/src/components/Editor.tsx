@@ -14,7 +14,7 @@ import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
 import Placeholder from '@tiptap/extension-placeholder';
-import { Share2, Palette, Trash2, FileText, X } from 'lucide-react';
+import { Share2, Palette, Trash2, FileText, X, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Note } from '../types';
 import api from '../lib/axios';
@@ -23,6 +23,7 @@ import { socket } from '../lib/socket';
 interface EditorProps {
   note: Note | null;
   onNoteUpdate: (updatedNote: Note | null) => void;
+  onToggleAi: () => void;
 }
 
 const COLORS = [
@@ -36,7 +37,7 @@ const COLORS = [
   { id: 'graphite', hex: '#1A1A1A', text: '#F0F0F0' }
 ];
 
-export default function Editor({ note, onNoteUpdate }: EditorProps) {
+export default function Editor({ note, onNoteUpdate, onToggleAi }: EditorProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [showPalette, setShowPalette] = useState(false);
   const [tagInput, setTagInput] = useState('');
@@ -211,6 +212,14 @@ export default function Editor({ note, onNoteUpdate }: EditorProps) {
         />
         
         {isSaving && <span className="text-[11px] text-[#444444] mr-2">Saving...</span>}
+
+        <button 
+          onClick={onToggleAi}
+          title="Ask Kairo AI"
+          className="w-[32px] h-[32px] rounded-md flex items-center justify-center hover:bg-[#1C1C1C] transition-colors cursor-pointer"
+        >
+          <Sparkles className="w-4 h-4 text-[#FF6B00]" />
+        </button>
 
         <button 
           onClick={handleShare}
