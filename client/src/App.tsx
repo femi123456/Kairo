@@ -1,8 +1,8 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import AuthPage from './pages/AuthPage';
 
-const AuthPage = () => <div>Auth Page Placeholder</div>;
 const AppLayout = () => <div>App Layout Placeholder</div>;
 const PublicNotePage = () => <div>Public Note Page Placeholder</div>;
 
