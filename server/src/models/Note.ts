@@ -83,11 +83,10 @@ const noteSchema = new Schema<INote>(
 noteSchema.index({ userId: 1 });
 
 // Max 10 versions stored, oldest dropped when exceeded
-noteSchema.pre('save', function (next) {
+noteSchema.pre('save', function () {
   if (this.versions && this.versions.length > 10) {
     this.versions = this.versions.slice(-10);
   }
-  next();
 });
 
 const Note = mongoose.model<INote>('Note', noteSchema);
