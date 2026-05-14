@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import AuthPage from './pages/AuthPage';
 import AppLayout from './pages/AppLayout';
-const PublicNotePage = () => <div>Public Note Page Placeholder</div>;
+import PublicNotePage from './pages/PublicNotePage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();

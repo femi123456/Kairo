@@ -6,6 +6,7 @@ import api from '../lib/axios';
 import Sidebar from '../components/Sidebar';
 import Editor from '../components/Editor';
 import KairoAI from '../components/KairoAI';
+import Topbar from '../components/Topbar';
 
 const AppLayout = () => {
   const { user } = useAuth();
@@ -103,17 +104,25 @@ const AppLayout = () => {
         onNewNote={handleNewNote}
         isLoading={isLoading}
       />
-      <Editor
-        note={selectedNote}
-        onNoteUpdate={handleNoteUpdate}
-        onToggleAi={() => setIsAiOpen(!isAiOpen)}
-      />
-      <KairoAI
-        note={selectedNote}
-        isOpen={isAiOpen}
-        onClose={() => setIsAiOpen(false)}
-        onNoteUpdate={handleNoteUpdate}
-      />
+      <div className="flex-1 flex flex-col min-w-0 bg-[#0A0A0A]">
+        <Topbar 
+          selectedNote={selectedNote}
+          isAIOpen={isAiOpen}
+          onToggleAI={() => setIsAiOpen(!isAiOpen)}
+        />
+        <div className="flex-1 flex flex-row overflow-hidden">
+          <Editor
+            note={selectedNote}
+            onNoteUpdate={handleNoteUpdate}
+          />
+          <KairoAI
+            note={selectedNote}
+            isOpen={isAiOpen}
+            onClose={() => setIsAiOpen(false)}
+            onNoteUpdate={handleNoteUpdate}
+          />
+        </div>
+      </div>
     </div>
   );
 };

@@ -69,7 +69,7 @@ const noteSchema = new Schema<INote>(
     versions: {
       type: [
         {
-          body: { type: String, required: true },
+          body: { type: String },
           savedAt: { type: Date, required: true },
         },
       ],

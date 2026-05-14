@@ -23,7 +23,6 @@ import { socket } from '../lib/socket';
 interface EditorProps {
   note: Note | null;
   onNoteUpdate: (updatedNote: Note | null) => void;
-  onToggleAi: () => void;
 }
 
 const COLORS = [
@@ -37,7 +36,7 @@ const COLORS = [
   { id: 'graphite', hex: '#1A1A1A', text: '#F0F0F0' }
 ];
 
-export default function Editor({ note, onNoteUpdate, onToggleAi }: EditorProps) {
+export default function Editor({ note, onNoteUpdate }: EditorProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [showPalette, setShowPalette] = useState(false);
   const [tagInput, setTagInput] = useState('');
@@ -67,7 +66,7 @@ export default function Editor({ note, onNoteUpdate, onToggleAi }: EditorProps) 
     }
   }, [note?._id]); // Re-initialize when note changes
 
-  // Update editor content when switching notes, if different
+  // Update editor content when switching notes or when external updates happen (like AI insertion)
   useEffect(() => {
     if (editor && !editor.isDestroyed && note) {
       const currentHTML = editor.getHTML();
@@ -75,7 +74,7 @@ export default function Editor({ note, onNoteUpdate, onToggleAi }: EditorProps) 
         editor.commands.setContent(note.body || '');
       }
     }
-  }, [note?._id, editor]);
+  }, [note?._id, note?.body, editor]);
 
   const handleContentChange = (newTitle: string, newBody: string) => {
     if (!note) return;
@@ -212,14 +211,6 @@ export default function Editor({ note, onNoteUpdate, onToggleAi }: EditorProps) 
         />
         
         {isSaving && <span className="text-[11px] text-[#444444] mr-2">Saving...</span>}
-
-        <button 
-          onClick={onToggleAi}
-          title="Ask Kairo AI"
-          className="w-[32px] h-[32px] rounded-md flex items-center justify-center hover:bg-[#1C1C1C] transition-colors cursor-pointer"
-        >
-          <Sparkles className="w-4 h-4 text-[#FF6B00]" />
-        </button>
 
         <button 
           onClick={handleShare}
