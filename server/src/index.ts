@@ -8,6 +8,9 @@ import { Server } from 'socket.io';
 import mongoose from 'mongoose';
 import authRoutes from './routes/authRoutes';
 import notesRoutes from './routes/notesRoutes';
+import aiRoutes from './routes/aiRoutes';
+import { initSocket } from './lib/socket';
+import { setIo } from './lib/socketInstance';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,12 +26,16 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/notes', notesRoutes);
+app.use('/api/ai', aiRoutes);
 
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: corsOptions,
 });
+
+setIo(io);
+initSocket(io);
 
 const startServer = async () => {
   try {

@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import crypto from 'crypto';
 import Note from '../models/Note';
 import { AuthRequest } from '../types';
+import { getIo } from '../lib/socketInstance';
 
 export const getNotes = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -19,6 +20,12 @@ export const createNote = async (req: AuthRequest, res: Response): Promise<void>
     const userId = req.user?.id;
     const note = new Note({ userId });
     await note.save();
+
+    const io = getIo();
+    if (io && userId) {
+      io.to(userId.toString()).emit('note-created', { note });
+    }
+
     res.status(201).json({ note });
   } catch (error) {
     console.error('createNote error:', error);
@@ -57,6 +64,11 @@ export const updateNote = async (req: AuthRequest, res: Response): Promise<void>
 
     await note.save();
 
+    const io = getIo();
+    if (io && userId) {
+      io.to(userId.toString()).emit('note-updated', { note });
+    }
+
     res.status(200).json({ note });
   } catch (error) {
     console.error('updateNote error:', error);
@@ -73,6 +85,11 @@ export const deleteNote = async (req: AuthRequest, res: Response): Promise<void>
     if (!note) {
       res.status(404).json({ message: 'Note not found' });
       return;
+    }
+
+    const io = getIo();
+    if (io && userId) {
+      io.to(userId.toString()).emit('note-deleted', { noteId });
     }
 
     res.status(200).json({ message: 'Note deleted' });
