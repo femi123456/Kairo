@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import api from '../lib/axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -8,7 +9,6 @@ const AuthPage = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -18,12 +18,10 @@ const AuthPage = () => {
     setName('');
     setEmail('');
     setPassword('');
-    setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
 
     try {
@@ -36,7 +34,8 @@ const AuthPage = () => {
       login(token, user);
       navigate('/app');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Authentication failed. Please try again.');
+      const msg = err.response?.data?.message || 'Authentication failed. Please try again.';
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -63,13 +62,6 @@ const AuthPage = () => {
           </div>
           <p className="text-[#888888] text-[14px]">Your collaborative workspace</p>
         </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 p-[10px_14px] bg-[rgba(255,59,48,0.1)] border border-[rgba(255,59,48,0.3)] rounded-lg text-[#FF3B30] text-[13px] text-center">
-            {error}
-          </div>
-        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">

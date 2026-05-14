@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Loader2 } from 'lucide-react';
@@ -63,7 +63,7 @@ export default function PublicNotePage() {
   const isLightBackground = note.pageColor === '#E6E1D8';
   const titleColor = isLightBackground ? '#111111' : '#F0F0F0';
 
-  const paperStyleClasses = {
+  const paperStyleClasses: Record<string, string> = {
     dots: 'bg-[radial-gradient(#444444_1px,transparent_1px)] [background-size:20px_20px]',
     lines: 'bg-[linear-gradient(transparent_23px,#444444_24px)] [background-size:100%_24px]',
     grid: 'bg-[linear-gradient(#444444_1px,transparent_1px),linear-gradient(90deg,#444444_1px,transparent_1px)] [background-size:20px_20px]',

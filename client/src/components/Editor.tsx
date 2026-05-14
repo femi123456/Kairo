@@ -14,7 +14,7 @@ import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
 import Placeholder from '@tiptap/extension-placeholder';
-import { Share2, Palette, Trash2, FileText, X, Sparkles } from 'lucide-react';
+import { Share2, Palette, Trash2, FileText, X } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Note } from '../types';
 import api from '../lib/axios';
@@ -39,8 +39,25 @@ const COLORS = [
 export default function Editor({ note, onNoteUpdate }: EditorProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [showPalette, setShowPalette] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState<any>(null);
   const [tagInput, setTagInput] = useState('');
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const handleClosePopovers = () => setShowPalette(false);
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowPalette(false);
+        setShowHistoryModal(null);
+      }
+    };
+    window.addEventListener('close-popovers', handleClosePopovers);
+    window.addEventListener('keydown', handleEsc);
+    return () => {
+      window.removeEventListener('close-popovers', handleClosePopovers);
+      window.removeEventListener('keydown', handleEsc);
+    };
+  }, []);
 
    const editor = useEditor({
     extensions: [
@@ -97,6 +114,7 @@ export default function Editor({ note, onNoteUpdate }: EditorProps) {
         const updatedNote = response.data.note;
         onNoteUpdate(updatedNote);
         socket.emit('note-updated', updatedNote);
+        toast('Note saved', { duration: 1500, style: { background: '#1C1C1C', color: '#F0F0F0', border: '1px solid #2A2A2A' } });
       } catch (error) {
         console.error('Save failed:', error);
       } finally {
@@ -127,6 +145,7 @@ export default function Editor({ note, onNoteUpdate }: EditorProps) {
       try {
         await api.delete(`/notes/${note._id}`);
         socket.emit('note-deleted', note._id);
+        toast.success('Note deleted');
         onNoteUpdate(null);
       } catch (error) {
         console.error('Delete failed:', error);
@@ -175,6 +194,17 @@ export default function Editor({ note, onNoteUpdate }: EditorProps) {
       </div>
     );
   }
+
+  const getRelativeTime = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  };
 
   // Derive styles from note
   const currentColor = COLORS.find(c => c.id === note.pageColor) || COLORS[0];
@@ -308,6 +338,23 @@ export default function Editor({ note, onNoteUpdate }: EditorProps) {
               ))}
             </div>
           </div>
+
+          {note.versions && note.versions.length > 0 && (
+            <div className="flex flex-col gap-2 mt-2 pt-4 border-t border-[#2A2A2A]">
+              <span className="text-[11px] uppercase text-[#888888] font-semibold tracking-wider">History</span>
+              <div className="flex flex-col gap-1 max-h-[120px] overflow-y-auto">
+                {[...note.versions].reverse().map((v: any, index: number) => (
+                  <button
+                    key={v.savedAt}
+                    onClick={() => setShowHistoryModal(v)}
+                    className="text-left text-[#888888] text-[12px] p-2 rounded-md hover:bg-[#1C1C1C] md:hover:bg-[#2A2A2A] transition-colors cursor-pointer"
+                  >
+                    Version {note.versions!.length - index} — {getRelativeTime(v.savedAt)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           
           </div>
         </>
@@ -426,6 +473,49 @@ export default function Editor({ note, onNoteUpdate }: EditorProps) {
         </div>
         </div>
       </div>
+
+      {/* History Modal */}
+      {showHistoryModal && (
+        <div className="fixed inset-0 bg-[rgba(0,0,0,0.7)] z-[100] flex items-center justify-center p-4">
+          <div className="bg-[#111111] border border-[#2A2A2A] rounded-2xl w-full max-w-[600px] max-h-[80vh] flex flex-col overflow-hidden shadow-2xl">
+            <div className="p-4 border-b border-[#2A2A2A] flex justify-between items-center bg-[#1C1C1C]">
+              <h3 className="text-[#F0F0F0] font-semibold text-[15px]">Version Preview — {getRelativeTime(showHistoryModal.savedAt)}</h3>
+              <button onClick={() => setShowHistoryModal(null)} className="text-[#888888] hover:text-[#F0F0F0]">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1 text-[#F0F0F0] text-[15px] leading-[1.8] font-['Inter'] tiptap-preview" 
+                 style={{ backgroundColor: currentColor.hex, backgroundImage: bgImage, color: textColor }}
+                 dangerouslySetInnerHTML={{ __html: showHistoryModal.body }} />
+            <div className="p-4 border-t border-[#2A2A2A] bg-[#1C1C1C] flex justify-end gap-3">
+              <button 
+                onClick={() => setShowHistoryModal(null)} 
+                className="px-4 py-2 rounded-lg text-[#888888] hover:text-[#F0F0F0] hover:bg-[#2A2A2A] transition-colors text-[13px] font-medium cursor-pointer"
+              >
+                Close
+              </button>
+              <button 
+                onClick={() => {
+                  updateNoteProperty({ body: showHistoryModal.body });
+                  setShowHistoryModal(null);
+                  toast.success('Version restored');
+                }} 
+                className="px-4 py-2 rounded-lg bg-[#FF6B00] text-white hover:bg-[#FF8C2A] transition-colors text-[13px] font-medium cursor-pointer"
+              >
+                Restore this version
+              </button>
+            </div>
+            <style>{`
+              .tiptap-preview { font-family: ${fontFamilyMap[note.fontFamily || 'sans']}; }
+              .tiptap-preview h1 { font-size: 22px; font-weight: 700; margin-bottom: 0.5em; margin-top: 1em; }
+              .tiptap-preview h2 { font-size: 18px; font-weight: 600; margin-bottom: 0.5em; margin-top: 1em; }
+              .tiptap-preview h3 { font-size: 15px; font-weight: 600; margin-bottom: 0.5em; margin-top: 1em; }
+              .tiptap-preview ul, .tiptap-preview ol { margin-left: 20px; margin-bottom: 1em; list-style: initial; }
+              .tiptap-preview blockquote { border-left: 3px solid #FF6B00; padding-left: 14px; color: #888888; margin-bottom: 1em; }
+            `}</style>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

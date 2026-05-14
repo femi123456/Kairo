@@ -16,6 +16,7 @@ export interface Note {
   noteWidth: string;
   isPublic: boolean;
   shareId: string | null;
+  versions?: { body: string; savedAt: string }[];
   createdAt: string;
   updatedAt: string;
 }

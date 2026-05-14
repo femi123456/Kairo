@@ -1,4 +1,3 @@
-import React from 'react';
 import { Sparkles, LogOut, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import type { Note } from '../types';

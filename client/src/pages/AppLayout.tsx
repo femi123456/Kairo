@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { socket } from '../lib/socket';
 import { useAuth } from '../context/AuthContext';
 import type { Note } from '../types';
@@ -95,6 +95,29 @@ const AppLayout = () => {
       console.error('Failed to create note:', error);
     }
   };
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Cmd/Ctrl + N
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        handleNewNote();
+      }
+      // Cmd/Ctrl + F
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        document.getElementById('search-input')?.focus();
+      }
+      // Escape
+      if (e.key === 'Escape') {
+        setIsAiOpen(false);
+        window.dispatchEvent(new Event('close-popovers'));
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
 
   return (
     <div className="flex flex-row h-screen w-screen overflow-hidden font-['Inter']">

@@ -57,6 +57,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="relative">
           <Search className="absolute left-[12px] top-1/2 -translate-y-1/2 w-[15px] h-[15px] text-[#444444]" />
           <input
+            id="search-input"
             type="text"
             placeholder="Search notes..."
             value={searchTerm}
