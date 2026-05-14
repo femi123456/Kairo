@@ -97,14 +97,28 @@ export default function KairoAI({ note, isOpen, onClose, onNoteUpdate }: KairoAI
   };
 
   return (
-    <div
-      className="h-full shrink-0 overflow-hidden transition-all duration-200 ease-in-out"
-      style={{ width: isOpen ? '320px' : '0px' }}
-    >
-      <div className="h-full w-[320px] bg-[#111111] border-l border-[#2A2A2A] flex flex-col">
+    <>
+      {/* Mobile Backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity"
+          onClick={onClose}
+        />
+      )}
 
-        {/* HEADER */}
-        <div className="h-[46px] px-[14px] border-b border-[#2A2A2A] flex items-center gap-2 shrink-0">
+      <div
+        className={`fixed md:relative inset-x-0 bottom-0 md:inset-auto z-50 md:z-0 shrink-0 overflow-hidden transition-all duration-300 md:duration-200 ease-in-out bg-[#111111] rounded-t-2xl md:rounded-none border-t md:border-t-0 md:border-l border-[#2A2A2A]
+          ${isOpen ? 'h-[65vh] md:h-full w-full md:w-[320px]' : 'h-0 md:h-full md:w-0'}`}
+      >
+        <div className="h-full w-full md:w-[320px] flex flex-col relative">
+
+          {/* Mobile Drag Handle */}
+          <div className="md:hidden w-full pt-4 pb-2 flex justify-center shrink-0">
+            <div className="w-[36px] h-[4px] bg-[#2A2A2A] rounded-[2px]" />
+          </div>
+
+          {/* HEADER */}
+          <div className="h-[46px] px-[14px] border-b border-[#2A2A2A] flex items-center gap-2 shrink-0">
           <Sparkles className="w-4 h-4 text-[#FF6B00]" />
           <span className="text-[14px] font-medium text-[#F0F0F0] flex-1">Kairo AI</span>
           <button
@@ -215,6 +229,7 @@ export default function KairoAI({ note, isOpen, onClose, onNoteUpdate }: KairoAI
         </div>
 
       </div>
-    </div>
+      </div>
+    </>
   );
 }

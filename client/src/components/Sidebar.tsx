@@ -44,7 +44,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, [notes, searchTerm, activeTag]);
 
   return (
-    <div className="flex flex-col h-full w-[268px] bg-[#111111] border-r border-[#2A2A2A] shrink-0">
+    <div className="flex flex-col h-full w-full bg-[#111111] border-r-0 md:border-r border-[#2A2A2A] shrink-0">
       {/* Top Section */}
       <div className="p-[16px_14px_10px]">
         {/* Logo */}
@@ -128,7 +128,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <div
                   key={note._id}
                   onClick={() => onSelectNote(note._id)}
-                  className={`relative p-[10px_12px] rounded-lg cursor-pointer mx-[6px] border ${
+                  className={`relative p-[10px_12px] rounded-lg cursor-pointer mx-[6px] min-h-[68px] md:min-h-auto border ${
                     isSelected
                       ? 'bg-[rgba(255,107,0,0.08)] border-transparent'
                       : 'border-transparent hover:bg-[#1C1C1C]'

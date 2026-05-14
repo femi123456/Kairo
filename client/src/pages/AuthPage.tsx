@@ -53,7 +53,7 @@ const AuthPage = () => {
       />
       
       {/* Card */}
-      <div className="relative w-full max-w-[400px] bg-[#111111] border border-[#2A2A2A] rounded-2xl p-10 mx-4 shadow-2xl">
+      <div className="relative w-full max-w-[400px] bg-[#111111] border border-[#2A2A2A] rounded-2xl p-[32px_20px] md:p-10 mx-4 md:shadow-2xl">
         
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">

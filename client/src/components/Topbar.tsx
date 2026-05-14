@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, LogOut } from 'lucide-react';
+import { Sparkles, LogOut, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import type { Note } from '../types';
 
@@ -7,9 +7,10 @@ interface TopbarProps {
   selectedNote: Note | null;
   isAIOpen: boolean;
   onToggleAI: () => void;
+  onBack?: () => void;
 }
 
-export default function Topbar({ selectedNote, isAIOpen, onToggleAI }: TopbarProps) {
+export default function Topbar({ selectedNote, isAIOpen, onToggleAI, onBack }: TopbarProps) {
   const { user, logout } = useAuth();
 
   const getInitials = (name?: string) => {
@@ -18,10 +19,18 @@ export default function Topbar({ selectedNote, isAIOpen, onToggleAI }: TopbarPro
   };
 
   return (
-    <div className="h-[46px] bg-[#0A0A0A] border-b border-[#2A2A2A] flex flex-row items-center justify-between px-4 shrink-0">
-      <div className="flex-1 overflow-hidden pr-4">
+    <div className="h-[46px] bg-[#0A0A0A] border-b border-[#2A2A2A] flex flex-row items-center justify-between px-2 md:px-4 shrink-0">
+      <div className="flex-1 overflow-hidden pr-2 md:pr-4 flex items-center gap-2">
+        {onBack && (
+          <button 
+            onClick={onBack}
+            className="md:hidden w-[32px] h-[32px] rounded-md flex items-center justify-center text-[#888888] hover:bg-[#1C1C1C] transition-colors cursor-pointer shrink-0"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+        )}
         {selectedNote && (
-          <div className="text-[14px] font-medium text-[#F0F0F0] truncate max-w-[300px]">
+          <div className="text-[14px] font-medium text-[#F0F0F0] truncate max-w-[300px] hidden md:block">
             {selectedNote.title || 'Untitled'}
           </div>
         )}
@@ -37,7 +46,7 @@ export default function Topbar({ selectedNote, isAIOpen, onToggleAI }: TopbarPro
           }`}
         >
           <Sparkles className="w-[14px] h-[14px]" />
-          Kairo AI
+          <span className="hidden md:inline">Kairo AI</span>
         </button>
 
         <div className="w-[1px] h-[20px] bg-[#2A2A2A] mx-1" />
@@ -45,7 +54,7 @@ export default function Topbar({ selectedNote, isAIOpen, onToggleAI }: TopbarPro
         <div className="w-[28px] h-[28px] rounded-full bg-[#1C1C1C] border border-[#2A2A2A] flex items-center justify-center text-[11px] font-semibold text-[#FF6B00]">
           {getInitials(user?.name)}
         </div>
-        <span className="text-[13px] text-[#888888] mr-1">
+        <span className="text-[13px] text-[#888888] mr-1 hidden md:block">
           {user?.name}
         </span>
 
