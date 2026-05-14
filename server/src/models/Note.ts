@@ -65,7 +65,6 @@ const noteSchema = new Schema<INote>(
       type: String,
       unique: true,
       sparse: true,
-      default: null,
     },
     versions: {
       type: [
