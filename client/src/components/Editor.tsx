@@ -14,7 +14,7 @@ import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
 import Placeholder from '@tiptap/extension-placeholder';
-import { Share2, Palette, Trash2, FileText, X, MoreHorizontal, Mic, Focus, Volume2, VolumeX, Minimize2 } from 'lucide-react';
+import { Share2, Palette, Trash2, FileText, X, MoreHorizontal, Mic, Focus, Volume2, VolumeX, Minimize2, Play, Pause, SkipForward } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Note } from '../types';
 import api from '../lib/axios';
@@ -41,7 +41,14 @@ const COLORS = [
   { id: 'blue', hex: '#EFF6FF', text: '#1A1A18' },
   { id: 'pink', hex: '#FDF2F8', text: '#1A1A18' },
   { id: 'dark', hex: '#0A0A0A', text: '#F0F0F0' },
-  { id: 'graphite', hex: '#1A1A1A', text: '#F0F0F0' }
+];
+
+const ZEN_TRACKS = [
+  { id: 1, title: 'Talking in the rain', artist: 'fourwalls', url: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3', cover: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=100&q=80' },
+  { id: 2, title: 'blurred figures', artist: 'lofi', url: 'https://assets.mixkit.co/active_storage/sfx/135/135-preview.mp3', cover: 'https://images.unsplash.com/photo-1493225457124-a1a2a5f25907?w=100&q=80' },
+  { id: 3, title: 'gloomy nights', artist: 'lofi', url: 'https://assets.mixkit.co/active_storage/sfx/143/143-preview.mp3', cover: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=100&q=80' },
+  { id: 4, title: 'lofi girl', artist: 'lofi', url: 'https://assets.mixkit.co/active_storage/sfx/144/144-preview.mp3', cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&q=80' },
+  { id: 5, title: 'in place dryhope', artist: 'lofi', url: 'https://assets.mixkit.co/active_storage/sfx/145/145-preview.mp3', cover: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=100&q=80' },
 ];
 
 export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocketUpdate, clearIncomingUpdate, isTypingRef, onEditorReady, onSelectedTextChange, isZenMode, onToggleZenMode }: EditorProps) {
@@ -58,10 +65,12 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
   const prevNoteIdRef = useRef<string | null>(null);
   const [isPlayingAmbient, setIsPlayingAmbient] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const currentTrack = ZEN_TRACKS[currentTrackIndex];
 
   // Initialize audio
   useEffect(() => {
-    audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
+    audioRef.current = new Audio(ZEN_TRACKS[0].url);
     audioRef.current.loop = true;
     audioRef.current.volume = 0.5;
     return () => {
@@ -79,6 +88,22 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
       setIsPlayingAmbient(true);
     }
   };
+
+  const nextTrack = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const nextIdx = (currentTrackIndex + 1) % ZEN_TRACKS.length;
+    setCurrentTrackIndex(nextIdx);
+  };
+
+  useEffect(() => {
+    if (audioRef.current) {
+      const wasPlaying = isPlayingAmbient;
+      audioRef.current.src = ZEN_TRACKS[currentTrackIndex].url;
+      if (wasPlaying) {
+        audioRef.current.play().catch(() => {});
+      }
+    }
+  }, [currentTrackIndex, isPlayingAmbient]);
 
   // Keep noteRef in sync so the onUpdate callback always has the current note
   noteRef.current = note;
@@ -359,22 +384,48 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
       
       {/* Floating Zen Controls */}
       {isZenMode && (
-        <div className="absolute top-6 right-6 z-[100] flex gap-3 opacity-20 hover:opacity-100 transition-opacity duration-300">
-          <button 
-            onClick={toggleAmbientSound}
-            className="w-[40px] h-[40px] rounded-full bg-[#1C1C1C] border border-[#2A2A2A] flex items-center justify-center text-[#888888] hover:text-[#FF6B00] hover:border-[#FF6B00] transition-all cursor-pointer shadow-xl"
-            title="Toggle Rain Sounds"
-          >
-            {isPlayingAmbient ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-          </button>
-          <button 
-            onClick={onToggleZenMode}
-            className="w-[40px] h-[40px] rounded-full bg-[#1C1C1C] border border-[#2A2A2A] flex items-center justify-center text-[#888888] hover:text-[#F0F0F0] transition-all cursor-pointer shadow-xl"
-            title="Exit Zen Mode"
-          >
-            <Minimize2 className="w-5 h-5" />
-          </button>
-        </div>
+        <>
+          {/* Music Player */}
+          <div className="absolute bottom-8 right-8 z-[100] flex items-center gap-3 bg-[#1C1C1C]/50 backdrop-blur-xl border border-[rgba(255,255,255,0.05)] rounded-[12px] p-2 pr-4 shadow-2xl transition-all duration-300">
+            <button 
+              onClick={onToggleZenMode}
+              className="w-7 h-7 flex items-center justify-center text-[#888888] hover:text-[#F0F0F0] transition-colors rounded-full hover:bg-white/10"
+              title="Exit Zen Mode"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            
+            <img src={currentTrack.cover} alt="cover" className="w-[36px] h-[36px] rounded-[6px] object-cover" />
+            
+            <div className="flex flex-col mr-3 min-w-[100px]">
+              <span className="text-white text-[13px] font-medium leading-tight">{currentTrack.title}</span>
+              <span className="text-[#888888] text-[11px] mt-0.5">{currentTrack.artist}</span>
+            </div>
+
+            <button 
+              onClick={toggleAmbientSound}
+              className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 transition-transform"
+            >
+              {isPlayingAmbient ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+            </button>
+
+            <button onClick={nextTrack} className="w-8 h-8 flex items-center justify-center text-[#888888] hover:text-white transition-colors">
+              <SkipForward className="w-4 h-4 fill-current" />
+            </button>
+          </div>
+
+          {/* Formatting Pill (Hover to reveal) */}
+          {editor && (
+            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-50 opacity-10 hover:opacity-100 transition-opacity duration-300">
+              <div className="flex items-center gap-1 p-1.5 bg-[#1C1C1C]/50 backdrop-blur-xl border border-[rgba(255,255,255,0.05)] rounded-full shadow-2xl">
+                <button onClick={() => editor.chain().focus().toggleBold().run()} className={`w-9 h-9 rounded-full flex items-center justify-center text-[14px] font-bold transition-colors ${editor.isActive('bold') ? 'bg-white/20 text-white' : 'text-[#888888] hover:text-white hover:bg-white/10'}`}>B</button>
+                <button onClick={() => editor.chain().focus().toggleItalic().run()} className={`w-9 h-9 rounded-full flex items-center justify-center text-[14px] italic transition-colors ${editor.isActive('italic') ? 'bg-white/20 text-white' : 'text-[#888888] hover:text-white hover:bg-white/10'}`}>I</button>
+                <button onClick={() => editor.chain().focus().toggleUnderline().run()} className={`w-9 h-9 rounded-full flex items-center justify-center text-[14px] underline transition-colors ${editor.isActive('underline') ? 'bg-white/20 text-white' : 'text-[#888888] hover:text-white hover:bg-white/10'}`}>U</button>
+                <button onClick={() => editor.chain().focus().toggleStrike().run()} className={`w-9 h-9 rounded-full flex items-center justify-center text-[14px] line-through transition-colors ${editor.isActive('strike') ? 'bg-white/20 text-white' : 'text-[#888888] hover:text-white hover:bg-white/10'}`}>S</button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* TOP BAR */}
