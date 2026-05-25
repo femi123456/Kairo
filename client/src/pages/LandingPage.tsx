@@ -50,46 +50,10 @@ export default function LandingPage() {
               Your Workspace <span className="text-xl">🌱</span>
             </p>
             
-            <h1 className="text-[52px] md:text-[84px] font-bold leading-[1.05] tracking-tight max-w-[900px] mb-16">
+            <h1 className="text-[52px] md:text-[84px] font-bold leading-[1.05] tracking-tight max-w-[900px]">
               THINK clearly, WRITE<br />
               beautifully, WORK together.
             </h1>
-
-            {/* 3D Glass Bowl & Pencil Visual */}
-            <div className="relative w-full max-w-[800px] h-[400px] flex items-center justify-center mt-10 mx-auto">
-              {/* Glass Bowl Container */}
-              <div className="absolute bottom-0 w-[500px] h-[200px] bg-white/5 backdrop-blur-2xl border border-white/10 rounded-b-[100px] rounded-t-[20px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-20 flex items-center justify-center overflow-visible">
-                {/* Inner rim glow */}
-                <div className="absolute top-0 w-full h-[40px] border-t border-white/20 rounded-full" />
-                <div className="absolute bottom-4 w-[200px] h-[20px] bg-[#FF6B00] blur-[40px] opacity-40 rounded-full" />
-              </div>
-
-              {/* Floating Orange Pencil */}
-              <div className="absolute z-30 bottom-[80px] animate-float-slow">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FF6B00" stroke="#FF8C2A" strokeWidth="1" className="w-32 h-32 md:w-48 md:h-48 drop-shadow-[0_10px_20px_rgba(255,107,0,0.4)]" style={{ filter: 'drop-shadow(0 0 20px rgba(255,107,0,0.4))' }}>
-                  <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
-                  <path d="m15 5 4 4" stroke="#FFF" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
-                  <path d="m11 9 4 4" stroke="#FFF" strokeWidth="2" strokeLinecap="round" opacity="0.3" />
-                </svg>
-              </div>
-
-              {/* Floating Badges */}
-              <div className="absolute top-[20px] left-[10%] z-40 animate-float-medium bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 flex items-center gap-2 text-[13px] text-white">
-                <Sparkles size={14} className="text-[#FF6B00]" /> AI Assisted
-              </div>
-
-              <div className="absolute top-[80px] right-[15%] z-40 animate-float-fast bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 flex items-center gap-2 text-[13px] text-white">
-                <Zap size={14} className="text-[#FF6B00]" /> Real-time Sync
-              </div>
-
-              <div className="absolute bottom-[160px] left-[5%] z-40 animate-float-slow bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 flex items-center gap-2 text-[13px] text-white" style={{ animationDelay: '1s' }}>
-                <Lock size={14} className="text-[#FF6B00]" /> Secure
-              </div>
-
-              <div className="absolute bottom-[120px] right-[5%] z-40 animate-float-medium bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 flex items-center gap-2 text-[13px] text-white" style={{ animationDelay: '2s' }}>
-                <Shield size={14} className="text-[#FF6B00]" /> Privacy First
-              </div>
-            </div>
           </div>
 
           {/* Bottom Overlays */}
@@ -117,8 +81,42 @@ export default function LandingPage() {
       </div>
 
       {/* Next Section (Slides naturally over sticky hero) */}
-      <div className="relative z-10 w-full min-h-screen bg-[#080808] border-t border-white/5 flex items-center justify-center">
-        <h2 className="text-white font-['Space_Grotesk'] text-[48px] md:text-[64px] font-bold">The Menu</h2>
+      <div className="relative z-10 w-full min-h-screen bg-[#080808] border-t border-white/5 flex items-center justify-center py-32">
+        {/* 3D Glass Bowl & Pencil Visual */}
+        <div className="relative w-full max-w-[800px] h-[400px] flex items-center justify-center mx-auto">
+          {/* Glass Bowl Container */}
+          <div className="absolute bottom-0 w-[500px] h-[200px] bg-white/5 backdrop-blur-2xl border border-white/10 rounded-b-[100px] rounded-t-[20px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-20 flex items-center justify-center overflow-visible">
+            {/* Inner rim glow */}
+            <div className="absolute top-0 w-full h-[40px] border-t border-white/20 rounded-full" />
+            <div className="absolute bottom-4 w-[200px] h-[20px] bg-[#FF6B00] blur-[40px] opacity-40 rounded-full" />
+          </div>
+
+          {/* Floating Orange Pencil */}
+          <div className="absolute z-30 bottom-[80px] animate-float-slow">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FF6B00" stroke="#FF8C2A" strokeWidth="1" className="w-32 h-32 md:w-48 md:h-48 drop-shadow-[0_10px_20px_rgba(255,107,0,0.4)]" style={{ filter: 'drop-shadow(0 0 20px rgba(255,107,0,0.4))' }}>
+              <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+              <path d="m15 5 4 4" stroke="#FFF" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
+              <path d="m11 9 4 4" stroke="#FFF" strokeWidth="2" strokeLinecap="round" opacity="0.3" />
+            </svg>
+          </div>
+
+          {/* Floating Badges */}
+          <div className="absolute top-[20px] left-[10%] z-40 animate-float-medium bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 flex items-center gap-2 text-[13px] text-white">
+            <Sparkles size={14} className="text-[#FF6B00]" /> AI Assisted
+          </div>
+
+          <div className="absolute top-[80px] right-[15%] z-40 animate-float-fast bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 flex items-center gap-2 text-[13px] text-white">
+            <Zap size={14} className="text-[#FF6B00]" /> Real-time Sync
+          </div>
+
+          <div className="absolute bottom-[160px] left-[5%] z-40 animate-float-slow bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 flex items-center gap-2 text-[13px] text-white" style={{ animationDelay: '1s' }}>
+            <Lock size={14} className="text-[#FF6B00]" /> Secure
+          </div>
+
+          <div className="absolute bottom-[120px] right-[5%] z-40 animate-float-medium bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 flex items-center gap-2 text-[13px] text-white" style={{ animationDelay: '2s' }}>
+            <Shield size={14} className="text-[#FF6B00]" /> Privacy First
+          </div>
+        </div>
       </div>
 
     </div>
