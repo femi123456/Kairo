@@ -18,15 +18,24 @@ export default function LandingPage() {
           className="w-full h-full relative flex flex-col"
           style={{ opacity: heroOpacity, scale: heroScale, filter }}
         >
+          {/* Background Grid */}
+          <div 
+            className="absolute inset-0 pointer-events-none opacity-20"
+            style={{
+              backgroundImage: 'linear-gradient(to right, #333 1px, transparent 1px), linear-gradient(to bottom, #333 1px, transparent 1px)',
+              backgroundSize: '60px 60px'
+            }}
+          />
+
           {/* Background glow effects */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#FF6B00] rounded-full blur-[150px] opacity-[0.07] pointer-events-none" />
 
           {/* Navbar */}
           <nav className="relative z-[100] flex items-center justify-between px-6 py-6 max-w-7xl mx-auto w-full">
             <div className="flex items-center gap-1">
-              <div className="font-['Georgia'] text-[24px] leading-none tracking-tight">
-                <span className="text-white font-bold">Kai</span>
-                <span className="text-[#FF6B00] font-bold">ro</span>
+              <div className="font-['Arial_Black',sans-serif] text-[24px] leading-none tracking-widest uppercase">
+                <span className="text-white">KAI</span>
+                <span className="text-[#FF6B00]">RO</span>
               </div>
             </div>
 
