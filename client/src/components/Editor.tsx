@@ -115,7 +115,7 @@ export default function Editor({ note, onNoteUpdate, incomingSocketUpdate, clear
     if (!editor || editor.isDestroyed) return;
     if (note?._id !== prevNoteIdRef.current) {
       prevNoteIdRef.current = note?._id || null;
-      editor.commands.setContent(note?.body || '', false);
+      editor.commands.setContent(note?.body || '', { emitUpdate: false });
       setLocalTitle(note?.title || '');
     }
   }, [note?._id, editor]);
@@ -124,7 +124,7 @@ export default function Editor({ note, onNoteUpdate, incomingSocketUpdate, clear
   useEffect(() => {
     if (!incomingSocketUpdate || !editor || editor.isDestroyed) return;
     if (editor.getHTML() !== incomingSocketUpdate.body) {
-      editor.commands.setContent(incomingSocketUpdate.body, false);
+      editor.commands.setContent(incomingSocketUpdate.body, { emitUpdate: false });
     }
     if (localTitle !== incomingSocketUpdate.title) {
       setLocalTitle(incomingSocketUpdate.title);

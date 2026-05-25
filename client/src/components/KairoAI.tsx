@@ -69,7 +69,7 @@ function convertMarkdownToHTML(text: string): string {
   return converted.filter(Boolean).join('');
 }
 
-export default function KairoAI({ note, isOpen, onClose, onNoteUpdate, editor, selectedText }: KairoAIProps) {
+export default function KairoAI({ note, isOpen, onClose, editor, selectedText }: KairoAIProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [input, setInput] = useState('');

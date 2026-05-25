@@ -15,7 +15,7 @@ export const sendPasswordResetEmail = async ({ name, email, resetUrl }: { name: 
   try {
     const data = await resend.emails.send({
       from: 'onboarding@resend.dev',
-      to: 'akinpeluoluwafemidavid@gmail.com',
+      to: email,
       subject: 'Reset your Kairo password',
       html: `
         <div style="background-color: #0A0A0A; font-family: 'Inter', Helvetica, Arial, sans-serif; padding: 40px 0; margin: 0; width: 100%;">
