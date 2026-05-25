@@ -250,7 +250,6 @@ export default function Editor({ note, onNoteUpdate, incomingSocketUpdate, clear
 
   // Derive styles from note
   const currentColor = COLORS.find(c => c.id === note.pageColor) || COLORS[0];
-  const isLightPage = !['default', 'dark', 'graphite'].includes(currentColor.id);
   const textColor = currentColor.text;
   
 
