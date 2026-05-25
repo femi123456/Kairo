@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
 import { toast } from 'sonner';
-import { ArrowLeft, Mail } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import api from '../lib/axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -14,6 +14,7 @@ const AuthPage = () => {
   const [resetToken, setResetToken] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [forgotSuccess, setForgotSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -69,191 +70,163 @@ const AuthPage = () => {
     }
   };
 
+  const getHeadline = () => {
+    if (mode === 'signin') return 'Welcome Back!';
+    if (mode === 'signup') return 'Create Account';
+    if (mode === 'forgot') return forgotSuccess ? 'Check your email' : 'Forgot Password';
+    return 'Reset Password';
+  };
+
   return (
-    <div className="relative min-h-screen w-full bg-[#0A0A0A] flex items-center justify-center font-['Inter']">
-      {/* Background Radial Gradient */}
+    <div className="relative min-h-screen w-full bg-[#050505] flex flex-col items-center justify-center font-['Inter'] overflow-hidden">
+      
+      {/* Background Grid */}
       <div 
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none opacity-20"
         style={{
-          background: 'radial-gradient(ellipse at center, rgba(255,107,0,0.06) 0%, transparent 70%)'
+          backgroundImage: 'linear-gradient(to right, #333 1px, transparent 1px), linear-gradient(to bottom, #333 1px, transparent 1px)',
+          backgroundSize: '60px 60px'
         }}
       />
-      
-      {/* Card */}
-      <div className="relative w-full max-w-[400px] bg-[#111111] border border-[#2A2A2A] rounded-2xl p-[32px_20px] md:p-10 mx-4 md:shadow-2xl">
+
+      {/* Back button for Forgot/Reset */}
+      {(mode === 'forgot' || mode === 'reset') && !forgotSuccess && (
+        <button 
+          onClick={() => { setMode('signin'); setForgotSuccess(false); }}
+          className="absolute top-8 left-8 text-[#888] hover:text-white transition-colors z-50 flex items-center gap-2"
+        >
+          <ArrowLeft size={20} /> Back
+        </button>
+      )}
+
+      {/* Top Left Logo (Optional, mimicking navbar placement without the navbar) */}
+      <Link to="/" className="absolute top-8 left-8 z-50 font-['Georgia'] text-[24px] leading-none tracking-tight">
+        <span className="text-white font-bold">Kai</span>
+        <span className="text-[#FF6B00] font-bold">ro</span>
+      </Link>
+
+      <div className="relative z-10 w-full max-w-[420px] flex flex-col items-center px-4">
         
-        {mode === 'forgot' && (
-          <button 
-            onClick={() => { setMode('signin'); setForgotSuccess(false); }}
-            className="absolute top-6 left-6 text-[#888888] hover:text-[#F0F0F0] transition-colors"
-          >
-            <ArrowLeft size={20} />
-          </button>
+        {/* Pill Badge */}
+        {!forgotSuccess && (
+          <div className="border border-white/20 rounded-full px-4 py-1.5 text-[12px] font-medium text-white/80 mb-6 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-white rounded-full opacity-70" /> 
+            {mode === 'signin' ? 'Login' : mode === 'signup' ? 'Register' : 'Recovery'}
+          </div>
         )}
 
-        {/* Logo or alternative Header */}
-        {mode === 'forgot' && forgotSuccess ? (
+        {/* Headline */}
+        <h1 className="text-[42px] md:text-[56px] font-bold text-white mb-10 tracking-tight text-center leading-tight">
+          {getHeadline()}
+        </h1>
+
+        {forgotSuccess ? (
           <div className="flex flex-col items-center text-center">
-            <Mail size={40} color="#FF6B00" className="mb-4" />
-            <h2 className="text-white text-[20px] font-semibold mb-2">Check your email</h2>
-            <p className="text-[#888888] text-[14px] mb-6">
-              We sent a password reset link to {email}
+            <p className="text-[#888888] text-[16px] mb-8">
+              We sent a password reset link to <span className="text-white">{email}</span>
             </p>
             <button 
               onClick={() => { setMode('signin'); setForgotSuccess(false); }}
-              className="text-[#888888] text-[13px] hover:text-[#FF6B00] transition-colors hover:underline"
+              className="text-[#FF6B00] text-[15px] font-medium hover:text-[#FF8C2A] transition-colors"
             >
               Back to sign in
             </button>
           </div>
         ) : (
-          <>
-            <div className="flex flex-col items-center mb-8">
-              {mode === 'forgot' ? (
-                <>
-                  <h2 className="text-white text-[20px] font-semibold mb-2">Forgot password</h2>
-                  <p className="text-[#888888] text-[14px]">Enter your email and we'll send you a reset link</p>
-                </>
-              ) : mode === 'reset' ? (
-                <>
-                  <h2 className="text-white text-[20px] font-semibold mb-2">Choose a new password</h2>
-                  <p className="text-[#888888] text-[14px]">Enter your new password below</p>
-                </>
-              ) : (
-                <>
-                  <div className="font-['Georgia'] text-[26px] mb-2 leading-none">
-                    <span className="text-white font-bold">Kai</span>
-                    <span className="text-[#FF6B00] font-bold">ro</span>
-                  </div>
-                  <p className="text-[#888888] text-[14px]">Your collaborative workspace</p>
-                </>
-              )}
-            </div>
+          <form onSubmit={handleSubmit} className="w-full flex flex-col items-center gap-4">
+            
+            {mode === 'signup' && (
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="w-full bg-[#1A1A1A] rounded-full px-6 py-4 text-white text-[15px] placeholder:text-[#666] focus:outline-none focus:bg-[#222] transition-colors"
+                placeholder="Full Name"
+              />
+            )}
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              {mode === 'signup' && (
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.05em] text-[#888888]">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    className="bg-[#1C1C1C] border border-[#2A2A2A] rounded-lg p-[11px_14px] text-[#F0F0F0] text-[14px] focus:border-[#FF6B00] focus:outline-none focus:ring-[3px] focus:ring-[rgba(255,107,0,0.15)] transition-all"
-                    placeholder="Jane Doe"
-                  />
-                </div>
-              )}
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full bg-[#1A1A1A] rounded-full px-6 py-4 text-white text-[15px] placeholder:text-[#666] focus:outline-none focus:bg-[#222] transition-colors"
+              placeholder="Email"
+            />
 
-              {(mode === 'signin' || mode === 'signup' || mode === 'forgot') && (
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.05em] text-[#888888]">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="bg-[#1C1C1C] border border-[#2A2A2A] rounded-lg p-[11px_14px] text-[#F0F0F0] text-[14px] focus:border-[#FF6B00] focus:outline-none focus:ring-[3px] focus:ring-[rgba(255,107,0,0.15)] transition-all"
-                    placeholder="you@example.com"
-                  />
-                </div>
-              )}
-
-              {(mode === 'signin' || mode === 'signup' || mode === 'reset') && (
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.05em] text-[#888888]">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="bg-[#1C1C1C] border border-[#2A2A2A] rounded-lg p-[11px_14px] text-[#F0F0F0] text-[14px] focus:border-[#FF6B00] focus:outline-none focus:ring-[3px] focus:ring-[rgba(255,107,0,0.15)] transition-all"
-                    placeholder="••••••••"
-                  />
-                  {mode === 'signin' && (
-                    <span 
-                      onClick={() => { setMode('forgot'); setForgotSuccess(false); }}
-                      className="text-[12px] text-[#888888] hover:text-[#FF6B00] cursor-pointer self-end mt-1 transition-colors"
-                    >
-                      Forgot password?
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {mode === 'reset' && (
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.05em] text-[#888888]">
-                    Confirm Password
-                  </label>
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    className="bg-[#1C1C1C] border border-[#2A2A2A] rounded-lg p-[11px_14px] text-[#F0F0F0] text-[14px] focus:border-[#FF6B00] focus:outline-none focus:ring-[3px] focus:ring-[rgba(255,107,0,0.15)] transition-all"
-                    placeholder="••••••••"
-                  />
-                  {password !== confirmPassword && confirmPassword.length > 0 && (
-                    <span className="text-[12px] text-red-500 mt-1">Passwords do not match</span>
-                  )}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="mt-2 w-full bg-[#FF6B00] text-white rounded-lg p-[12px] text-[15px] font-medium hover:bg-[#FF8C2A] transition-[background-color] duration-150 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                {isLoading ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : mode === 'signin' ? (
-                  'Sign In'
-                ) : mode === 'signup' ? (
-                  'Sign Up'
-                ) : mode === 'forgot' ? (
-                  'Send reset link'
-                ) : (
-                  'Reset password'
-                )}
-              </button>
-            </form>
-
-            {/* Toggle */}
-            {(mode === 'signin' || mode === 'signup') && (
-              <div className="mt-6 text-center text-[13px] text-[#888888]">
-                {mode === 'signin' ? (
-                  <p>
-                    Don't have an account?{' '}
-                    <span 
-                      onClick={() => setMode('signup')}
-                      className="text-[#FF6B00] cursor-pointer hover:underline"
-                    >
-                      Sign up
-                    </span>
-                  </p>
-                ) : (
-                  <p>
-                    Already have an account?{' '}
-                    <span 
-                      onClick={() => setMode('signin')}
-                      className="text-[#FF6B00] cursor-pointer hover:underline"
-                    >
-                      Sign in
-                    </span>
-                  </p>
-                )}
+            {(mode === 'signin' || mode === 'signup' || mode === 'reset') && (
+              <div className="relative w-full">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full bg-[#1A1A1A] rounded-full pl-6 pr-14 py-4 text-white text-[15px] placeholder:text-[#666] focus:outline-none focus:bg-[#222] transition-colors"
+                  placeholder="Password"
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-[#666] hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             )}
-          </>
+
+            {mode === 'reset' && (
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="w-full bg-[#1A1A1A] rounded-full px-6 py-4 text-white text-[15px] placeholder:text-[#666] focus:outline-none focus:bg-[#222] transition-colors"
+                placeholder="Confirm Password"
+              />
+            )}
+
+            {mode === 'signin' && (
+              <span 
+                onClick={() => { setMode('forgot'); setForgotSuccess(false); }}
+                className="text-[#FF6B00] text-[13px] mt-2 cursor-pointer hover:text-[#FF8C2A] transition-colors"
+              >
+                Forgot Password?
+              </span>
+            )}
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="mt-6 bg-[#2A1608] border border-[#FF6B00]/20 rounded-full pr-8 pl-2.5 py-2.5 flex items-center gap-4 hover:bg-[#3A1E0B] hover:border-[#FF6B00]/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+            >
+              {isLoading ? (
+                <div className="w-9 h-9 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <div className="w-9 h-9 rounded-full bg-[#FF6B00] flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <ArrowRight size={18} className="text-white" />
+                </div>
+              )}
+              <span className="text-white text-[15px] font-medium pr-2">
+                {mode === 'signin' ? 'Login' : mode === 'signup' ? 'Register' : mode === 'forgot' ? 'Send Link' : 'Reset'}
+              </span>
+            </button>
+          </form>
         )}
+
+        {/* Footer Toggle */}
+        {!forgotSuccess && (mode === 'signin' || mode === 'signup') && (
+          <div className="mt-12 text-[14px] text-white font-medium">
+            {mode === 'signin' ? 'No account? ' : 'Already have an account? '}
+            <button 
+              onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
+              className="text-[#FF6B00] hover:text-[#FF8C2A] transition-colors"
+            >
+              {mode === 'signin' ? 'Register' : 'Login'}
+            </button>
+          </div>
+        )}
+
       </div>
     </div>
   );
