@@ -55,28 +55,6 @@ export default function LandingPage() {
               beautifully, WORK together.
             </h1>
           </div>
-
-          {/* Bottom Overlays */}
-          <div className="absolute bottom-10 left-10 z-[100] flex flex-col items-start max-w-[280px]">
-            <div className="flex gap-2 mb-4">
-              <span className="border border-white/20 rounded-full px-4 py-1.5 text-[12px] font-medium">Fast</span>
-              <span className="border border-white/20 rounded-full px-4 py-1.5 text-[12px] font-medium">Minimal</span>
-            </div>
-            <h3 className="text-[20px] font-semibold mb-2 leading-tight w-[300px]">From your brain to the canvas.</h3>
-            <p className="text-[13px] text-[#A0A0A0] leading-relaxed w-[300px]">
-              Note-taking made effortless. Fuel your creativity and free your time.
-            </p>
-          </div>
-
-          <div className="absolute bottom-10 right-10 z-[100]">
-            <Link 
-              to="/auth" 
-              className="flex items-center gap-2 bg-[#FF6B00] hover:bg-[#FF8C2A] text-white px-8 py-4 rounded-xl text-[16px] font-bold transition-all hover:scale-105 shadow-[0_10px_20px_rgba(255,107,0,0.3)]"
-            >
-              Start Writing <ArrowRight size={20} />
-            </Link>
-          </div>
-
         </motion.div>
       </div>
 
@@ -116,6 +94,27 @@ export default function LandingPage() {
           <div className="absolute bottom-[120px] right-[5%] z-40 animate-float-medium bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 flex items-center gap-2 text-[13px] text-white" style={{ animationDelay: '2s' }}>
             <Shield size={14} className="text-[#FF6B00]" /> Privacy First
           </div>
+        </div>
+
+        {/* Bottom Overlays */}
+        <div className="absolute bottom-10 left-10 z-[100] flex flex-col items-start max-w-[280px]">
+          <div className="flex gap-2 mb-4">
+            <span className="border border-white/20 rounded-full px-4 py-1.5 text-[12px] font-medium">Fast</span>
+            <span className="border border-white/20 rounded-full px-4 py-1.5 text-[12px] font-medium">Minimal</span>
+          </div>
+          <h3 className="text-[20px] font-semibold mb-2 leading-tight w-[300px]">From your brain to the canvas.</h3>
+          <p className="text-[13px] text-[#A0A0A0] leading-relaxed w-[300px]">
+            Note-taking made effortless. Fuel your creativity and free your time.
+          </p>
+        </div>
+
+        <div className="absolute bottom-10 right-10 z-[100]">
+          <Link 
+            to="/auth" 
+            className="flex items-center gap-2 bg-[#FF6B00] hover:bg-[#FF8C2A] text-white px-8 py-4 rounded-xl text-[16px] font-bold transition-all hover:scale-105 shadow-[0_10px_20px_rgba(255,107,0,0.3)]"
+          >
+            Start Writing <ArrowRight size={20} />
+          </Link>
         </div>
       </div>
 
