@@ -14,7 +14,7 @@ import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
 import Placeholder from '@tiptap/extension-placeholder';
-import { Share2, Palette, Trash2, FileText, X, MoreHorizontal, Mic, Focus, Play, Pause, SkipForward } from 'lucide-react';
+import { Share2, Palette, Trash2, FileText, X, MoreHorizontal, Mic, Focus, Play, Pause, SkipForward, Minimize2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Note } from '../types';
 import api from '../lib/axios';
@@ -364,6 +364,16 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
       {/* Floating Zen Controls */}
       {isZenMode && (
         <>
+          {/* Exit Zen Mode Button (Top Right) */}
+          <button 
+            onClick={onToggleZenMode}
+            className="absolute top-8 right-8 z-[100] px-4 py-2 bg-[#1C1C1C]/50 backdrop-blur-xl border border-[rgba(255,255,255,0.05)] rounded-full text-[#888888] hover:text-white hover:bg-white/10 transition-all flex items-center gap-2 shadow-2xl"
+            title="Exit Zen Mode"
+          >
+            <Minimize2 className="w-4 h-4" />
+            <span className="text-[13px] font-medium hidden sm:block">Exit Zen</span>
+          </button>
+
           {/* Hidden YouTube Audio Player */}
           {isPlayingAmbient && (
             <iframe
@@ -379,14 +389,6 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
 
           {/* Music Player */}
           <div className="absolute bottom-8 right-8 z-[100] flex items-center gap-3 bg-[#1C1C1C]/50 backdrop-blur-xl border border-[rgba(255,255,255,0.05)] rounded-[12px] p-2 pr-4 shadow-2xl transition-all duration-300">
-            <button 
-              onClick={onToggleZenMode}
-              className="w-7 h-7 flex items-center justify-center text-[#888888] hover:text-[#F0F0F0] transition-colors rounded-full hover:bg-white/10"
-              title="Exit Zen Mode"
-            >
-              <X className="w-4 h-4" />
-            </button>
-            
             <img src={currentTrack.cover} alt="cover" className="w-[36px] h-[36px] rounded-[6px] object-cover" />
             
             <div className="flex flex-col mr-3 min-w-[100px]">

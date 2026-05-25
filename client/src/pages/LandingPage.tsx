@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Sparkles, Zap, Lock, Shield, ArrowRight } from 'lucide-react';
+import { Sparkles, Zap, Lock, Shield, ArrowRight, Mic, Bot, Focus, Share2 } from 'lucide-react';
 import { motion, useScroll, useTransform, useMotionTemplate } from 'framer-motion';
 
 export default function LandingPage() {
@@ -40,6 +40,9 @@ export default function LandingPage() {
             </div>
 
             <div className="flex items-center gap-6">
+              <a href="#features" className="hidden md:block text-[#A0A0A0] text-[14px] hover:text-white transition-colors">
+                Features
+              </a>
               <Link to="/auth?mode=signup" className="hidden md:block text-[#A0A0A0] text-[14px] hover:text-white transition-colors">
                 New writer?
               </Link>
@@ -134,6 +137,61 @@ export default function LandingPage() {
         </div>
       </div>
 
+      </div>
+
+      {/* Features Section */}
+      <div id="features" className="relative z-20 w-full bg-[#050505] border-t border-white/5 flex flex-col items-center py-32 px-6">
+        <div className="max-w-6xl w-full">
+          <div className="text-center mb-20">
+            <h2 className="text-[32px] md:text-[48px] font-bold mb-4">Everything you need.</h2>
+            <p className="text-[#A0A0A0] text-[16px] max-w-2xl mx-auto">Powerful features to help you capture your thoughts, format them with AI, and focus without distractions.</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-8">
+            <FeatureCard 
+              icon={<Mic className="w-12 h-12 text-[#FF6B00] drop-shadow-[0_10px_20px_rgba(255,107,0,0.4)]" />}
+              title="Voice-to-Text"
+              desc="Speak your thoughts and let AI format them into perfect Markdown."
+            />
+            <FeatureCard 
+              icon={<Bot className="w-12 h-12 text-[#FF6B00] drop-shadow-[0_10px_20px_rgba(255,107,0,0.4)]" />}
+              title="Chat with Notes"
+              desc="Ask questions and get answers based on the context of your entire workspace."
+            />
+            <FeatureCard 
+              icon={<Focus className="w-12 h-12 text-[#FF6B00] drop-shadow-[0_10px_20px_rgba(255,107,0,0.4)]" />}
+              title="Zen Focus Mode"
+              desc="Eliminate distractions and immerse yourself with ambient soundscapes."
+            />
+            <FeatureCard 
+              icon={<Zap className="w-12 h-12 text-[#FF6B00] drop-shadow-[0_10px_20px_rgba(255,107,0,0.4)]" />}
+              title="Real-time Sync"
+              desc="Collaborate with yourself across devices seamlessly and instantly."
+            />
+            <FeatureCard 
+              icon={<Lock className="w-12 h-12 text-[#FF6B00] drop-shadow-[0_10px_20px_rgba(255,107,0,0.4)]" />}
+              title="Secure & Private"
+              desc="Your notes are encrypted and accessible only to you."
+            />
+            <FeatureCard 
+              icon={<Share2 className="w-12 h-12 text-[#FF6B00] drop-shadow-[0_10px_20px_rgba(255,107,0,0.4)]" />}
+              title="Public Sharing"
+              desc="Generate a public link to share your knowledge with the world."
+            />
+          </div>
+        </div>
+      </div>
+
+    </div>
+  );
+}
+
+function FeatureCard({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
+  return (
+    <div className="flex flex-col items-center text-center p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+      <div className="mb-6">{icon}</div>
+      <h3 className="text-xl font-semibold text-white mb-3">{title}</h3>
+      <p className="text-[#A0A0A0] text-[15px] leading-relaxed">{desc}</p>
     </div>
   );
 }
