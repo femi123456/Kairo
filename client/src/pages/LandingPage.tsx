@@ -47,7 +47,12 @@ export default function LandingPage() {
           <div className="flex-1 w-full relative flex flex-col items-center justify-center pb-20 px-4 text-center">
             
             <p className="text-[14px] font-medium text-[#A0A0A0] mb-6 flex items-center justify-center gap-2">
-              Your Workspace <span className="text-xl">🌱</span>
+              Your Workspace 
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FF6B00" stroke="#FF8C2A" strokeWidth="1" className="w-4 h-4 mt-0.5">
+                <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+                <path d="m15 5 4 4" stroke="#FFF" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
+                <path d="m11 9 4 4" stroke="#FFF" strokeWidth="2" strokeLinecap="round" opacity="0.3" />
+              </svg>
             </p>
             
             <h1 className="text-[52px] md:text-[84px] font-bold leading-[1.05] tracking-tight max-w-[900px]">
