@@ -14,18 +14,17 @@ interface KairoAIProps {
 }
 
 const EMPTY_PROMPTS = [
-  'Help me start this note',
+  'Help me start a note',
+  'What are my recent notes about?',
   'Suggest an outline',
   'What should I write about?',
-  'Give me an intro paragraph',
 ];
 
 const CONTENT_PROMPTS = [
   'Summarize this note',
+  'Find connections to my other notes',
   'Improve the writing',
-  'Fix grammar',
   'Generate 3 ideas',
-  'Turn into bullet points',
 ];
 
 function applyInlineFormatting(text: string): string {
@@ -95,7 +94,7 @@ export default function KairoAI({ note, isOpen, onClose, editor, selectedText }:
   }, [messages, isLoading]);
 
   const sendMessage = async (text: string) => {
-    if (!text.trim() || !note || isLoading) return;
+    if (!text.trim() || isLoading) return;
 
     const userMessage: Message = { role: 'user', content: text.trim() };
     setMessages(prev => [...prev, userMessage]);
@@ -115,12 +114,12 @@ export default function KairoAI({ note, isOpen, onClose, editor, selectedText }:
         },
         body: JSON.stringify({
           message: text.trim(),
-          noteContext: {
+          noteContext: note ? {
             title: note.title,
             body: note.body,
             tags: note.tags,
             selectedText: selectedText || '',
-          },
+          } : undefined,
           history,
         }),
       });
@@ -248,7 +247,7 @@ export default function KairoAI({ note, isOpen, onClose, editor, selectedText }:
               <button
                 key={prompt}
                 onClick={() => sendMessage(prompt)}
-                disabled={isLoading || !note}
+                disabled={isLoading}
                 className="text-[11px] px-[10px] py-[4px] rounded-full bg-[#1C1C1C] border border-[#2A2A2A] text-[#888888] cursor-pointer hover:border-[#FF6B00] hover:text-[#FF6B00] transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {prompt}
@@ -263,7 +262,7 @@ export default function KairoAI({ note, isOpen, onClose, editor, selectedText }:
             <div className="flex-1 flex flex-col items-center justify-center gap-2">
               <Bot className="w-7 h-7 text-[#333333]" />
               <p className="text-[#444444] text-[13px] text-center">
-                Ask Kairo AI anything about your note
+                Ask Kairo AI anything about your notes
               </p>
             </div>
           ) : (
@@ -360,7 +359,7 @@ export default function KairoAI({ note, isOpen, onClose, editor, selectedText }:
           />
           <button
             onClick={() => sendMessage(input)}
-            disabled={!input.trim() || isLoading || !note}
+            disabled={!input.trim() || isLoading}
             className="w-[36px] h-[36px] bg-[#FF6B00] rounded-lg flex items-center justify-center cursor-pointer hover:bg-[#FF8C2A] transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
           >
             <Send className="w-[15px] h-[15px] text-white" />

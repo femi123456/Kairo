@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import axios from 'axios';
+import Note from '../models/Note';
+import { AuthRequest } from '../types';
 
-export const chat = async (req: Request, res: Response): Promise<void> => {
+export const chat = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { message, noteContext, history } = req.body;
 
@@ -22,16 +24,28 @@ export const chat = async (req: Request, res: Response): Promise<void> => {
       body = body.substring(0, 1000);
     }
 
+    const userId = req.user?.id;
+    let allNotesContext = '';
+    if (userId) {
+      const allNotes = await Note.find({ userId }).select('title body tags').limit(10);
+      allNotesContext = allNotes.map(n => `Title: ${n.title}\nTags: ${n.tags?.join(',')}\nContent: ${n.body.replace(/<[^>]*>?/gm, '').substring(0, 400)}`).join('\n---\n');
+    }
+
     let systemPrompt = `You are Kairo AI, a helpful writing assistant inside Kairo, a collaborative notes app. Help the user with their note. Be concise and useful.
 Always format your responses using markdown. Use bullet points for lists, **bold** for emphasis, headers for sections when appropriate. Keep responses concise — 2 to 4 sentences for simple questions, longer only when generating or rewriting content.
 When the user asks to rewrite or improve specific text, only return the rewritten version, nothing else.
-Current note context:
+If the user asks about their other notes, use the context provided below.
+
+Here is the context of all their recent notes:
+${allNotesContext}
+
+Current active note context:
 Title: ${title}
 Tags: ${tags}
 Content: ${body}`;
 
     if (selectedText) {
-      systemPrompt += `\n\nThe user has selected this specific text in their note:
+      systemPrompt += `\n\nThe user has selected this specific text in their active note:
 '${selectedText}'
 When they ask to rewrite, improve, or do anything to 'this' or 'it', they mean this selected text.`;
     }
