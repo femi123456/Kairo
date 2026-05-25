@@ -64,8 +64,8 @@ export default function LandingPage() {
               </svg>
             </p>
             
-            <h1 className="text-[52px] md:text-[84px] font-bold leading-[1.05] tracking-tight max-w-[900px]">
-              THINK clearly, WRITE<br />
+            <h1 className="text-[40px] sm:text-[52px] md:text-[84px] font-bold leading-[1.05] tracking-tight max-w-[900px]">
+              THINK clearly, WRITE<br className="hidden sm:block" />
               beautifully, WORK together.
             </h1>
           </div>
@@ -75,9 +75,9 @@ export default function LandingPage() {
       {/* Next Section (Slides naturally over sticky hero) */}
       <div className="relative z-10 w-full min-h-screen bg-[#080808] border-t border-white/5 flex items-center justify-center py-32">
         {/* 3D Glass Bowl & Pencil Visual */}
-        <div className="relative w-full max-w-[800px] h-[400px] flex items-center justify-center mx-auto">
+        <div className="relative w-full max-w-[800px] h-[300px] md:h-[400px] flex items-center justify-center mx-auto">
           {/* Glass Bowl Container */}
-          <div className="absolute bottom-0 w-[500px] h-[200px] bg-white/5 backdrop-blur-2xl border border-white/10 rounded-b-[100px] rounded-t-[20px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-20 flex items-center justify-center overflow-visible">
+          <div className="absolute bottom-0 w-[85%] sm:w-[500px] h-[160px] md:h-[200px] bg-white/5 backdrop-blur-2xl border border-white/10 rounded-b-[100px] rounded-t-[20px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-20 flex items-center justify-center overflow-visible">
             {/* Inner rim glow */}
             <div className="absolute top-0 w-full h-[40px] border-t border-white/20 rounded-full" />
             <div className="absolute bottom-4 w-[200px] h-[20px] bg-[#FF6B00] blur-[40px] opacity-40 rounded-full" />
@@ -93,42 +93,44 @@ export default function LandingPage() {
           </div>
 
           {/* Floating Badges */}
-          <div className="absolute top-[20px] left-[10%] z-40 animate-float-medium bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 flex items-center gap-2 text-[13px] text-white">
-            <Sparkles size={14} className="text-[#FF6B00]" /> AI Assisted
+          <div className="absolute top-[20px] left-[5%] md:left-[10%] z-40 animate-float-medium bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-3 md:px-4 py-1.5 md:py-2 flex items-center gap-1.5 md:gap-2 text-[11px] md:text-[13px] text-white">
+            <Sparkles size={14} className="text-[#FF6B00]" /> <span className="hidden sm:inline">AI Assisted</span><span className="sm:hidden">AI</span>
           </div>
 
-          <div className="absolute top-[80px] right-[15%] z-40 animate-float-fast bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 flex items-center gap-2 text-[13px] text-white">
-            <Zap size={14} className="text-[#FF6B00]" /> Real-time Sync
+          <div className="absolute top-[80px] right-[5%] md:right-[15%] z-40 animate-float-fast bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-3 md:px-4 py-1.5 md:py-2 flex items-center gap-1.5 md:gap-2 text-[11px] md:text-[13px] text-white">
+            <Zap size={14} className="text-[#FF6B00]" /> <span className="hidden sm:inline">Real-time Sync</span><span className="sm:hidden">Sync</span>
           </div>
 
-          <div className="absolute bottom-[160px] left-[5%] z-40 animate-float-slow bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 flex items-center gap-2 text-[13px] text-white" style={{ animationDelay: '1s' }}>
+          <div className="absolute bottom-[140px] md:bottom-[160px] left-[2%] md:left-[5%] z-40 animate-float-slow bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-3 md:px-4 py-1.5 md:py-2 flex items-center gap-1.5 md:gap-2 text-[11px] md:text-[13px] text-white" style={{ animationDelay: '1s' }}>
             <Lock size={14} className="text-[#FF6B00]" /> Secure
           </div>
 
-          <div className="absolute bottom-[120px] right-[5%] z-40 animate-float-medium bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 flex items-center gap-2 text-[13px] text-white" style={{ animationDelay: '2s' }}>
-            <Shield size={14} className="text-[#FF6B00]" /> Privacy First
+          <div className="absolute bottom-[100px] md:bottom-[120px] right-[2%] md:right-[5%] z-40 animate-float-medium bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-3 md:px-4 py-1.5 md:py-2 flex items-center gap-1.5 md:gap-2 text-[11px] md:text-[13px] text-white" style={{ animationDelay: '2s' }}>
+            <Shield size={14} className="text-[#FF6B00]" /> Privacy
           </div>
         </div>
 
         {/* Bottom Overlays */}
-        <div className="absolute bottom-10 left-10 z-[100] flex flex-col items-start max-w-[280px]">
-          <div className="flex gap-2 mb-4">
-            <span className="border border-white/20 rounded-full px-4 py-1.5 text-[12px] font-medium">Fast</span>
-            <span className="border border-white/20 rounded-full px-4 py-1.5 text-[12px] font-medium">Minimal</span>
+        <div className="absolute bottom-8 md:bottom-10 left-0 w-full px-6 md:px-10 z-[100] flex flex-col-reverse md:flex-row items-center md:items-end justify-between gap-6 md:gap-8">
+          <div className="flex flex-col items-center md:items-start max-w-[280px] text-center md:text-left">
+            <div className="flex gap-2 mb-4">
+              <span className="border border-white/20 rounded-full px-4 py-1.5 text-[12px] font-medium">Fast</span>
+              <span className="border border-white/20 rounded-full px-4 py-1.5 text-[12px] font-medium">Minimal</span>
+            </div>
+            <h3 className="text-[20px] font-semibold mb-2 leading-tight w-full">From your brain to the canvas.</h3>
+            <p className="text-[13px] text-[#A0A0A0] leading-relaxed w-full">
+              Note-taking made effortless. Fuel your creativity and free your time.
+            </p>
           </div>
-          <h3 className="text-[20px] font-semibold mb-2 leading-tight w-[300px]">From your brain to the canvas.</h3>
-          <p className="text-[13px] text-[#A0A0A0] leading-relaxed w-[300px]">
-            Note-taking made effortless. Fuel your creativity and free your time.
-          </p>
-        </div>
 
-        <div className="absolute bottom-10 right-10 z-[100]">
-          <Link 
-            to="/auth" 
-            className="flex items-center gap-2 bg-[#FF6B00] hover:bg-[#FF8C2A] text-white px-8 py-4 rounded-xl text-[16px] font-bold transition-all hover:scale-105 shadow-[0_10px_20px_rgba(255,107,0,0.3)]"
-          >
-            Start Writing <ArrowRight size={20} />
-          </Link>
+          <div>
+            <Link 
+              to="/auth" 
+              className="flex items-center gap-2 bg-[#FF6B00] hover:bg-[#FF8C2A] text-white px-8 py-4 rounded-xl text-[16px] font-bold transition-all hover:scale-105 shadow-[0_10px_20px_rgba(255,107,0,0.3)]"
+            >
+              Start Writing <ArrowRight size={20} />
+            </Link>
+          </div>
         </div>
       </div>
 
