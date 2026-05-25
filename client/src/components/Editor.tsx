@@ -252,7 +252,6 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
         const updatedNote = response.data.note;
         onNoteUpdate(updatedNote);
         socket.emit('note-updated', { userId: updatedNote.userId, note: updatedNote });
-        toast('Note saved', { duration: 1500, style: { background: '#1C1C1C', color: '#F0F0F0', border: '1px solid #2A2A2A' } });
       } catch (error) {
         console.error('Save failed:', error);
       } finally {
