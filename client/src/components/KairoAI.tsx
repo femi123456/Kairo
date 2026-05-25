@@ -1,18 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, X, Bot, Send } from 'lucide-react';
+import { Sparkles, X, Bot, Send, TextSelect } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Note, Message } from '../types';
-import api from '../lib/axios';
-import { socket } from '../lib/socket';
+import type { Editor } from '@tiptap/react';
 
 interface KairoAIProps {
   note: Note | null;
   isOpen: boolean;
   onClose: () => void;
   onNoteUpdate?: (updatedNote: Note) => void;
+  editor: Editor | null;
+  selectedText: string;
 }
 
-const QUICK_PROMPTS = [
+const EMPTY_PROMPTS = [
+  'Help me start this note',
+  'Suggest an outline',
+  'What should I write about?',
+  'Give me an intro paragraph',
+];
+
+const CONTENT_PROMPTS = [
   'Summarize this note',
   'Improve the writing',
   'Fix grammar',
@@ -20,13 +28,57 @@ const QUICK_PROMPTS = [
   'Turn into bullet points',
 ];
 
-export default function KairoAI({ note, isOpen, onClose, onNoteUpdate }: KairoAIProps) {
+function applyInlineFormatting(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/(?<!\*)\*([^*]+?)\*(?!\*)/g, '<em>$1</em>')
+    .replace(/_(.+?)_/g, '<em>$1</em>')
+    .replace(/`([^`]+?)`/g, '<code>$1</code>');
+}
+
+function convertMarkdownToHTML(text: string): string {
+  const blocks = text.split(/\n\n+/);
+  const converted = blocks.map(block => {
+    const lines = block.split('\n').filter(l => l.trim());
+    if (lines.length === 0) return '';
+
+    // Check for unordered list
+    if (lines.every(l => /^\s*[-*]\s/.test(l))) {
+      const items = lines.map(l => `<li>${applyInlineFormatting(l.replace(/^\s*[-*]\s+/, ''))}</li>`).join('');
+      return `<ul>${items}</ul>`;
+    }
+
+    // Check for ordered list
+    if (lines.every(l => /^\s*\d+\.\s/.test(l))) {
+      const items = lines.map(l => `<li>${applyInlineFormatting(l.replace(/^\s*\d+\.\s+/, ''))}</li>`).join('');
+      return `<ol>${items}</ol>`;
+    }
+
+    // Single line blocks
+    if (lines.length === 1) {
+      const line = lines[0];
+      if (line.startsWith('### ')) return `<h3>${applyInlineFormatting(line.slice(4))}</h3>`;
+      if (line.startsWith('## ')) return `<h2>${applyInlineFormatting(line.slice(3))}</h2>`;
+      if (line.startsWith('# ')) return `<h1>${applyInlineFormatting(line.slice(2))}</h1>`;
+    }
+
+    // Default: paragraph
+    return `<p>${applyInlineFormatting(lines.join(' '))}</p>`;
+  });
+
+  return converted.filter(Boolean).join('');
+}
+
+export default function KairoAI({ note, isOpen, onClose, onNoteUpdate, editor, selectedText }: KairoAIProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const prevNoteIdRef = useRef<string | null>(null);
+
+  const hasContent = note ? note.body.replace(/<[^>]+>/g, '').trim().length > 0 : false;
+  const quickPrompts = hasContent ? CONTENT_PROMPTS : EMPTY_PROMPTS;
 
   // Reset messages when note changes
   useEffect(() => {
@@ -52,24 +104,87 @@ export default function KairoAI({ note, isOpen, onClose, onNoteUpdate }: KairoAI
 
     try {
       const history = [...messages, userMessage].slice(-10);
-      const response = await api.post('/ai', {
-        message: text.trim(),
-        noteContext: {
-          title: note.title,
-          body: note.body,
-          tags: note.tags,
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const token = localStorage.getItem('kairo_token');
+
+      const response = await fetch(`${apiUrl}/ai`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
-        history,
+        body: JSON.stringify({
+          message: text.trim(),
+          noteContext: {
+            title: note.title,
+            body: note.body,
+            tags: note.tags,
+            selectedText: selectedText || '',
+          },
+          history,
+        }),
       });
 
-      const aiMessage: Message = { role: 'assistant', content: response.data.reply };
-      setMessages(prev => [...prev, aiMessage]);
+      if (!response.ok || !response.body) {
+        throw new Error('Stream failed');
+      }
+
+      // Add empty AI message that we'll stream into
+      const aiMessageIndex = messages.length + 1; // +1 for the user message we just added
+      setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || !trimmed.startsWith('data: ')) continue;
+          const data = trimmed.slice(6);
+          if (data === '[DONE]') continue;
+          if (data === '[ERROR]') {
+            setMessages(prev => {
+              const updated = [...prev];
+              updated[aiMessageIndex] = { role: 'assistant', content: 'Kairo AI encountered an error' };
+              return updated;
+            });
+            continue;
+          }
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.token) {
+              setMessages(prev => {
+                const updated = [...prev];
+                const msg = updated[aiMessageIndex];
+                if (msg) {
+                  updated[aiMessageIndex] = { ...msg, content: msg.content + parsed.token };
+                }
+                return updated;
+              });
+            }
+          } catch {
+            // Skip malformed chunks
+          }
+        }
+      }
     } catch (error) {
-      const errorMessage: Message = {
-        role: 'assistant',
-        content: 'Kairo AI is unavailable right now',
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      console.error('AI stream error:', error);
+      setMessages(prev => {
+        // If last message is an empty AI message from failed stream, update it
+        const last = prev[prev.length - 1];
+        if (last && last.role === 'assistant' && !last.content) {
+          return [...prev.slice(0, -1), { role: 'assistant' as const, content: 'Kairo AI is unavailable right now' }];
+        }
+        return [...prev, { role: 'assistant' as const, content: 'Kairo AI is unavailable right now' }];
+      });
     } finally {
       setIsLoading(false);
     }
@@ -82,18 +197,12 @@ export default function KairoAI({ note, isOpen, onClose, onNoteUpdate }: KairoAI
     }
   };
 
-  const insertIntoNote = async (content: string) => {
-    if (!note) return;
-    try {
-      const newBody = note.body + `<p>${content}</p>`;
-      const response = await api.patch(`/notes/${note._id}`, { body: newBody });
-      const updatedNote = response.data.note;
-      if (onNoteUpdate) onNoteUpdate(updatedNote);
-      socket.emit('note-updated', updatedNote);
-      toast.success('Added to note');
-    } catch (error) {
-      console.error('Insert failed:', error);
-    }
+  const insertIntoNote = (content: string) => {
+    if (!editor || editor.isDestroyed) return;
+    const html = convertMarkdownToHTML(content);
+    editor.commands.focus('end');
+    editor.commands.insertContent('<hr>' + html);
+    toast.success('Added to note');
   };
 
   return (
@@ -135,7 +244,7 @@ export default function KairoAI({ note, isOpen, onClose, onNoteUpdate }: KairoAI
             Try asking
           </span>
           <div className="flex flex-wrap gap-1.5">
-            {QUICK_PROMPTS.map((prompt) => (
+            {quickPrompts.map((prompt) => (
               <button
                 key={prompt}
                 onClick={() => sendMessage(prompt)}
@@ -168,9 +277,28 @@ export default function KairoAI({ note, isOpen, onClose, onNoteUpdate }: KairoAI
                         : 'max-w-[90%] bg-[#1C1C1C] text-[#F0F0F0] border border-[#2A2A2A] rounded-[12px_12px_12px_3px] px-3 py-[9px] text-[13px] leading-relaxed whitespace-pre-wrap'
                     }
                   >
-                    {msg.content}
+                    {msg.content || (isLoading && i === messages.length - 1 ? (
+                      <span className="flex items-center gap-1.5">
+                        <style>{`
+                          @keyframes kairo-bounce {
+                            0%, 100% { transform: translateY(0); }
+                            50% { transform: translateY(-4px); }
+                          }
+                        `}</style>
+                        {[0, 150, 300].map((delay) => (
+                          <span
+                            key={delay}
+                            className="inline-block w-[6px] h-[6px] rounded-full bg-[#444444]"
+                            style={{
+                              animation: `kairo-bounce 0.8s ease-in-out infinite`,
+                              animationDelay: `${delay}ms`,
+                            }}
+                          />
+                        ))}
+                      </span>
+                    ) : '')}
                   </div>
-                  {msg.role === 'assistant' && msg.content !== 'Kairo AI is unavailable right now' && (
+                  {msg.role === 'assistant' && msg.content && msg.content !== 'Kairo AI is unavailable right now' && msg.content !== 'Kairo AI encountered an error' && (
                     <button
                       onClick={() => insertIntoNote(msg.content)}
                       className="text-[11px] text-[#FF6B00] bg-transparent border-none cursor-pointer py-1 hover:underline"
@@ -181,8 +309,8 @@ export default function KairoAI({ note, isOpen, onClose, onNoteUpdate }: KairoAI
                 </div>
               ))}
 
-              {/* Typing indicator */}
-              {isLoading && (
+              {/* Typing indicator — only shown before streaming message is added */}
+              {isLoading && (messages.length === 0 || messages[messages.length - 1]?.role !== 'assistant') && (
                 <div className="self-start max-w-[90%] bg-[#1C1C1C] border border-[#2A2A2A] rounded-[12px_12px_12px_3px] px-3 py-[9px] flex items-center gap-1.5">
                   <style>{`
                     @keyframes kairo-bounce {
@@ -206,6 +334,17 @@ export default function KairoAI({ note, isOpen, onClose, onNoteUpdate }: KairoAI
           )}
           <div ref={messagesEndRef} />
         </div>
+
+        {/* SELECTED TEXT INDICATOR */}
+        {selectedText && (
+          <div
+            className="flex items-center gap-1.5 mx-[10px] mb-[6px] px-[10px] py-[4px] rounded-[6px]"
+            style={{ fontSize: '11px', color: '#FF6B00', background: 'rgba(255,107,0,0.08)' }}
+          >
+            <TextSelect className="w-3 h-3 shrink-0" />
+            <span>Asking about selected text</span>
+          </div>
+        )}
 
         {/* INPUT ROW */}
         <div className="p-[10px] border-t border-[#2A2A2A] flex gap-2 shrink-0">

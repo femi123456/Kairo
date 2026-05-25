@@ -23,6 +23,11 @@ import { socket } from '../lib/socket';
 interface EditorProps {
   note: Note | null;
   onNoteUpdate: (updatedNote: Note | null) => void;
+  incomingSocketUpdate: Note | null;
+  clearIncomingUpdate: () => void;
+  isTypingRef: React.MutableRefObject<boolean>;
+  onEditorReady: (editor: any) => void;
+  onSelectedTextChange: (text: string) => void;
 }
 
 const COLORS = [
@@ -36,12 +41,18 @@ const COLORS = [
   { id: 'graphite', hex: '#1A1A1A', text: '#F0F0F0' }
 ];
 
-export default function Editor({ note, onNoteUpdate }: EditorProps) {
+export default function Editor({ note, onNoteUpdate, incomingSocketUpdate, clearIncomingUpdate, isTypingRef, onEditorReady, onSelectedTextChange }: EditorProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [showPalette, setShowPalette] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState<any>(null);
   const [tagInput, setTagInput] = useState('');
+  const [localTitle, setLocalTitle] = useState(note?.title || '');
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const noteRef = useRef<Note | null>(note);
+  const prevNoteIdRef = useRef<string | null>(null);
+
+  // Keep noteRef in sync so the onUpdate callback always has the current note
+  noteRef.current = note;
 
   useEffect(() => {
     const handleClosePopovers = () => setShowPalette(false);
@@ -59,7 +70,7 @@ export default function Editor({ note, onNoteUpdate }: EditorProps) {
     };
   }, []);
 
-   const editor = useEditor({
+  const editor = useEditor({
     extensions: [
       StarterKit.configure({
         horizontalRule: false,
@@ -77,21 +88,49 @@ export default function Editor({ note, onNoteUpdate }: EditorProps) {
       HorizontalRule,
       Placeholder.configure({ placeholder: 'Start writing...' })
     ],
-    content: note?.body || '',
+    content: '',
     onUpdate: ({ editor }) => {
-      handleContentChange(note?.title || '', editor.getHTML());
+      const currentNote = noteRef.current;
+      if (!currentNote) return;
+      handleContentChange(currentNote.title || '', editor.getHTML());
+    },
+    onSelectionUpdate: ({ editor }) => {
+      const { from, to } = editor.state.selection;
+      const text = from !== to
+        ? editor.state.doc.textBetween(from, to, ' ')
+        : '';
+      onSelectedTextChange(text);
     }
-  }, [note?._id]); // Re-initialize when note changes
+  }); // No dependency array — editor initializes once
 
-  // Update editor content when switching notes or when external updates happen (like AI insertion)
+  // Expose editor instance to parent
   useEffect(() => {
-    if (editor && !editor.isDestroyed && note) {
-      const currentHTML = editor.getHTML();
-      if (currentHTML !== note.body) {
-        editor.commands.setContent(note.body || '');
-      }
+    if (editor) {
+      onEditorReady(editor);
     }
-  }, [note?._id, note?.body, editor]);
+  }, [editor]);
+
+  // Handle note switching: update editor content via commands when the selected note changes
+  useEffect(() => {
+    if (!editor || editor.isDestroyed) return;
+    if (note?._id !== prevNoteIdRef.current) {
+      prevNoteIdRef.current = note?._id || null;
+      editor.commands.setContent(note?.body || '', false);
+      setLocalTitle(note?.title || '');
+    }
+  }, [note?._id, editor]);
+
+  // Handle incoming real-time updates from other tabs via Socket.io
+  useEffect(() => {
+    if (!incomingSocketUpdate || !editor || editor.isDestroyed) return;
+    if (editor.getHTML() !== incomingSocketUpdate.body) {
+      editor.commands.setContent(incomingSocketUpdate.body, false);
+    }
+    if (localTitle !== incomingSocketUpdate.title) {
+      setLocalTitle(incomingSocketUpdate.title);
+    }
+    clearIncomingUpdate();
+  }, [incomingSocketUpdate, editor]);
 
   const handleContentChange = (newTitle: string, newBody: string) => {
     if (!note) return;
@@ -100,6 +139,7 @@ export default function Editor({ note, onNoteUpdate }: EditorProps) {
       clearTimeout(typingTimeoutRef.current);
     }
 
+    isTypingRef.current = true;
     setIsSaving(true);
     
     // Optimistic local update for typing responsiveness
@@ -113,17 +153,19 @@ export default function Editor({ note, onNoteUpdate }: EditorProps) {
         });
         const updatedNote = response.data.note;
         onNoteUpdate(updatedNote);
-        socket.emit('note-updated', updatedNote);
+        socket.emit('note-updated', { userId: updatedNote.userId, note: updatedNote });
         toast('Note saved', { duration: 1500, style: { background: '#1C1C1C', color: '#F0F0F0', border: '1px solid #2A2A2A' } });
       } catch (error) {
         console.error('Save failed:', error);
       } finally {
+        isTypingRef.current = false;
         setIsSaving(false);
       }
     }, 500);
   };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalTitle(e.target.value);
     handleContentChange(e.target.value, editor?.getHTML() || '');
   };
 
@@ -133,7 +175,7 @@ export default function Editor({ note, onNoteUpdate }: EditorProps) {
       const response = await api.patch(`/notes/${note._id}`, updates);
       const updatedNote = response.data.note;
       onNoteUpdate(updatedNote);
-      socket.emit('note-updated', updatedNote);
+      socket.emit('note-updated', { userId: updatedNote.userId, note: updatedNote });
     } catch (error) {
       console.error('Update failed:', error);
     }
@@ -144,7 +186,7 @@ export default function Editor({ note, onNoteUpdate }: EditorProps) {
     if (window.confirm('Delete this note?')) {
       try {
         await api.delete(`/notes/${note._id}`);
-        socket.emit('note-deleted', note._id);
+        socket.emit('note-deleted', { userId: note.userId, noteId: note._id });
         toast.success('Note deleted');
         onNoteUpdate(null);
       } catch (error) {
@@ -234,7 +276,7 @@ export default function Editor({ note, onNoteUpdate }: EditorProps) {
       <div className="h-[46px] bg-[#111111] border-b border-[#2A2A2A] flex items-center px-4 gap-2 shrink-0 relative z-20">
         <input 
           type="text" 
-          value={note.title} 
+          value={localTitle} 
           onChange={handleTitleChange}
           placeholder="Untitled"
           className="flex-1 bg-transparent border-none outline-none text-[15px] font-semibold text-[#F0F0F0] placeholder-[#333333]"

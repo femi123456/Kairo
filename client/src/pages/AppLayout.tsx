@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { socket } from '../lib/socket';
 import { useAuth } from '../context/AuthContext';
 import type { Note } from '../types';
@@ -15,8 +15,16 @@ const AppLayout = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [mobileView, setMobileView] = useState<'list' | 'editor'>('list');
+  const [incomingSocketUpdate, setIncomingSocketUpdate] = useState<Note | null>(null);
+  const [editorInstance, setEditorInstance] = useState<any>(null);
+  const [selectedText, setSelectedText] = useState('');
+  const selectedNoteIdRef = useRef<string | null>(null);
+  const isTypingRef = useRef(false);
 
   const selectedNote = notes.find(n => n._id === selectedNoteId) || null;
+
+  // Keep ref in sync so socket handlers can read the current value
+  selectedNoteIdRef.current = selectedNoteId;
 
   const handleNoteUpdate = useCallback((updatedNote: Note | null) => {
     if (!updatedNote) {
@@ -48,6 +56,7 @@ const AppLayout = () => {
     fetchNotes();
 
     const handleNoteCreated = ({ note }: { note: Note }) => {
+      if (!note || !note._id) return;
       setNotes((prev) => {
         if (prev.find(n => n._id === note._id)) return prev;
         return [note, ...prev];
@@ -55,12 +64,18 @@ const AppLayout = () => {
     };
 
     const handleNoteUpdated = ({ note }: { note: Note }) => {
+      if (!note || !note._id) return;
+      if (note._id === selectedNoteIdRef.current && isTypingRef.current) return;
       setNotes((prev) =>
         prev.map((n) => (n._id === note._id ? note : n))
       );
+      if (note._id === selectedNoteIdRef.current) {
+        setIncomingSocketUpdate(note);
+      }
     };
 
     const handleNoteDeleted = ({ noteId }: { noteId: string }) => {
+      if (!noteId) return;
       setNotes((prev) => prev.filter((n) => n._id !== noteId));
       setSelectedNoteId(prev => prev === noteId ? null : prev);
     };
@@ -90,7 +105,7 @@ const AppLayout = () => {
         return [newNote, ...prev];
       });
       setSelectedNoteId(newNote._id);
-      socket.emit('note-created', newNote);
+      socket.emit('note-created', { userId: user!.id, note: newNote });
     } catch (error) {
       console.error('Failed to create note:', error);
     }
@@ -144,12 +159,19 @@ const AppLayout = () => {
           <Editor
             note={selectedNote}
             onNoteUpdate={handleNoteUpdate}
+            incomingSocketUpdate={incomingSocketUpdate}
+            clearIncomingUpdate={() => setIncomingSocketUpdate(null)}
+            isTypingRef={isTypingRef}
+            onEditorReady={setEditorInstance}
+            onSelectedTextChange={setSelectedText}
           />
           <KairoAI
             note={selectedNote}
             isOpen={isAiOpen}
             onClose={() => setIsAiOpen(false)}
             onNoteUpdate={handleNoteUpdate}
+            editor={editorInstance}
+            selectedText={selectedText}
           />
         </div>
       </div>
