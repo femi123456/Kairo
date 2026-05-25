@@ -14,7 +14,7 @@ import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
 import Placeholder from '@tiptap/extension-placeholder';
-import { Share2, Palette, Trash2, FileText, X, MoreHorizontal, Mic, Focus, Volume2, VolumeX, Minimize2, Play, Pause, SkipForward } from 'lucide-react';
+import { Share2, Palette, Trash2, FileText, X, MoreHorizontal, Mic, Focus, Play, Pause, SkipForward } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Note } from '../types';
 import api from '../lib/axios';
