@@ -14,7 +14,7 @@ import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
 import Placeholder from '@tiptap/extension-placeholder';
-import { Share2, Palette, Trash2, FileText, X, MoreHorizontal, Mic } from 'lucide-react';
+import { Share2, Palette, Trash2, FileText, X, MoreHorizontal, Mic, Focus, Volume2, VolumeX, Minimize2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Note } from '../types';
 import api from '../lib/axios';
@@ -29,6 +29,8 @@ interface EditorProps {
   isTypingRef: React.MutableRefObject<boolean>;
   onEditorReady: (editor: any) => void;
   onSelectedTextChange: (text: string) => void;
+  isZenMode: boolean;
+  onToggleZenMode: () => void;
 }
 
 const COLORS = [
@@ -42,7 +44,7 @@ const COLORS = [
   { id: 'graphite', hex: '#1A1A1A', text: '#F0F0F0' }
 ];
 
-export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocketUpdate, clearIncomingUpdate, isTypingRef, onEditorReady, onSelectedTextChange }: EditorProps) {
+export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocketUpdate, clearIncomingUpdate, isTypingRef, onEditorReady, onSelectedTextChange, isZenMode, onToggleZenMode }: EditorProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [showPalette, setShowPalette] = useState(false);
   const [showMoreTools, setShowMoreTools] = useState(false);
@@ -54,6 +56,29 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const noteRef = useRef<Note | null>(note);
   const prevNoteIdRef = useRef<string | null>(null);
+  const [isPlayingAmbient, setIsPlayingAmbient] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Initialize audio
+  useEffect(() => {
+    audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
+    audioRef.current.loop = true;
+    audioRef.current.volume = 0.5;
+    return () => {
+      audioRef.current?.pause();
+      audioRef.current = null;
+    };
+  }, []);
+
+  const toggleAmbientSound = () => {
+    if (isPlayingAmbient) {
+      audioRef.current?.pause();
+      setIsPlayingAmbient(false);
+    } else {
+      audioRef.current?.play().catch(() => toast.error('Browser blocked audio playback'));
+      setIsPlayingAmbient(true);
+    }
+  };
 
   // Keep noteRef in sync so the onUpdate callback always has the current note
   noteRef.current = note;
@@ -330,9 +355,30 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full relative font-['Inter']">
+    <div className={`flex-1 flex flex-col h-full relative font-['Inter'] transition-all duration-500 ${isZenMode ? 'p-12' : ''}`}>
       
+      {/* Floating Zen Controls */}
+      {isZenMode && (
+        <div className="absolute top-6 right-6 z-[100] flex gap-3 opacity-20 hover:opacity-100 transition-opacity duration-300">
+          <button 
+            onClick={toggleAmbientSound}
+            className="w-[40px] h-[40px] rounded-full bg-[#1C1C1C] border border-[#2A2A2A] flex items-center justify-center text-[#888888] hover:text-[#FF6B00] hover:border-[#FF6B00] transition-all cursor-pointer shadow-xl"
+            title="Toggle Rain Sounds"
+          >
+            {isPlayingAmbient ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+          </button>
+          <button 
+            onClick={onToggleZenMode}
+            className="w-[40px] h-[40px] rounded-full bg-[#1C1C1C] border border-[#2A2A2A] flex items-center justify-center text-[#888888] hover:text-[#F0F0F0] transition-all cursor-pointer shadow-xl"
+            title="Exit Zen Mode"
+          >
+            <Minimize2 className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+
       {/* TOP BAR */}
+      {!isZenMode && (
       <div className="h-[46px] bg-[#111111] border-b border-[#2A2A2A] flex items-center px-4 gap-2 shrink-0 relative z-20">
         <input 
           type="text" 
@@ -360,12 +406,21 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
         </button>
 
         <button 
+          onClick={onToggleZenMode}
+          title="Enter Zen Mode"
+          className="w-[32px] h-[32px] rounded-md flex items-center justify-center hover:bg-[#1C1C1C] transition-colors cursor-pointer"
+        >
+          <Focus className="w-4 h-4 text-[#888888]" />
+        </button>
+
+        <button 
           onClick={handleDelete}
           className="w-[32px] h-[32px] rounded-md flex items-center justify-center hover:bg-[#1C1C1C] group transition-colors cursor-pointer"
         >
           <Trash2 className="w-4 h-4 text-[#888888] group-hover:text-[#FF3B30] transition-colors" />
         </button>
       </div>
+      )}
 
       {/* PAGE STYLE POPOVER */}
       {showPalette && (
@@ -450,7 +505,7 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
       )}
 
       {/* FORMAT TOOLBAR */}
-      {editor && (
+      {editor && !isZenMode && (
         <div className="flex flex-row items-center gap-1 p-[6px_16px] bg-[#111111] border-b border-[#2A2A2A] shrink-0 z-30 relative">
           <div className="flex gap-0.5 shrink-0">
             <button onClick={() => editor.chain().focus().toggleBold().run()} className={`h-[36px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer transition-colors ${editor.isActive('bold') ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}>B</button>
@@ -507,6 +562,7 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
       )}
 
       {/* TAGS ROW */}
+      {!isZenMode && (
       <div className="flex flex-row items-center flex-wrap gap-1.5 p-[6px_16px] border-b border-[#2A2A2A] shrink-0 bg-[#111111]">
         <span className="text-[11px] uppercase text-[#444444] font-semibold tracking-wider mr-2">Tags</span>
         {note.tags?.map((tag) => (
@@ -526,6 +582,7 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
           className="bg-transparent border-none outline-none text-[12px] text-[#F0F0F0] placeholder-[#333333] min-w-[80px]"
         />
       </div>
+      )}
 
       {/* NOTE BODY */}
       <div 

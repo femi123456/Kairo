@@ -14,6 +14,7 @@ const AppLayout = () => {
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAiOpen, setIsAiOpen] = useState(false);
+  const [isZenMode, setIsZenMode] = useState(false);
   const [mobileView, setMobileView] = useState<'list' | 'editor'>('list');
   const [incomingSocketUpdate, setIncomingSocketUpdate] = useState<Note | null>(null);
   const [editorInstance, setEditorInstance] = useState<any>(null);
@@ -131,6 +132,7 @@ const AppLayout = () => {
       // Escape
       if (e.key === 'Escape') {
         setIsAiOpen(false);
+        setIsZenMode(false);
         window.dispatchEvent(new Event('close-popovers'));
       }
     };
@@ -141,25 +143,29 @@ const AppLayout = () => {
 
   return (
     <div className="flex flex-row h-screen w-screen overflow-hidden font-['Inter']">
-      <div className={`h-full shrink-0 ${mobileView === 'list' ? 'block w-full' : 'hidden'} md:block md:w-[268px]`}>
-        <Sidebar
-          notes={notes}
-          selectedNoteId={selectedNoteId}
-          onSelectNote={(id) => {
-            setSelectedNoteId(id);
-            setMobileView('editor');
-          }}
-          onNewNote={handleNewNote}
-          isLoading={isLoading}
-        />
-      </div>
+      {!isZenMode && (
+        <div className={`h-full shrink-0 ${mobileView === 'list' ? 'block w-full' : 'hidden'} md:block md:w-[268px]`}>
+          <Sidebar
+            notes={notes}
+            selectedNoteId={selectedNoteId}
+            onSelectNote={(id) => {
+              setSelectedNoteId(id);
+              setMobileView('editor');
+            }}
+            onNewNote={handleNewNote}
+            isLoading={isLoading}
+          />
+        </div>
+      )}
       <div className={`flex-1 flex-col min-w-0 bg-[#0A0A0A] ${mobileView === 'editor' ? 'flex' : 'hidden'} md:flex`}>
-        <Topbar 
-          selectedNote={selectedNote}
-          isAIOpen={isAiOpen}
-          onToggleAI={() => setIsAiOpen(!isAiOpen)}
-          onBack={() => setMobileView('list')}
-        />
+        {!isZenMode && (
+          <Topbar 
+            selectedNote={selectedNote}
+            isAIOpen={isAiOpen}
+            onToggleAI={() => setIsAiOpen(!isAiOpen)}
+            onBack={() => setMobileView('list')}
+          />
+        )}
         <div className="flex-1 flex flex-row overflow-hidden">
           <Editor
             note={selectedNote}
@@ -170,6 +176,8 @@ const AppLayout = () => {
             isTypingRef={isTypingRef}
             onEditorReady={setEditorInstance}
             onSelectedTextChange={setSelectedText}
+            isZenMode={isZenMode}
+            onToggleZenMode={() => setIsZenMode(!isZenMode)}
           />
           <KairoAI
             note={selectedNote}
