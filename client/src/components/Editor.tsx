@@ -14,7 +14,7 @@ import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
 import Placeholder from '@tiptap/extension-placeholder';
-import { Share2, Palette, Trash2, FileText, X } from 'lucide-react';
+import { Share2, Palette, Trash2, FileText, X, MoreHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Note } from '../types';
 import api from '../lib/axios';
@@ -45,6 +45,7 @@ const COLORS = [
 export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocketUpdate, clearIncomingUpdate, isTypingRef, onEditorReady, onSelectedTextChange }: EditorProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [showPalette, setShowPalette] = useState(false);
+  const [showMoreTools, setShowMoreTools] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState<any>(null);
   const [tagInput, setTagInput] = useState('');
   const [localTitle, setLocalTitle] = useState(note?.title || '');
@@ -56,10 +57,14 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
   noteRef.current = note;
 
   useEffect(() => {
-    const handleClosePopovers = () => setShowPalette(false);
+    const handleClosePopovers = () => {
+      setShowPalette(false);
+      setShowMoreTools(false);
+    };
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setShowPalette(false);
+        setShowMoreTools(false);
         setShowHistoryModal(null);
       }
     };
@@ -383,40 +388,50 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
 
       {/* FORMAT TOOLBAR */}
       {editor && (
-        <div className="flex flex-row items-center gap-1 p-[6px_16px] bg-[#111111] border-b border-[#2A2A2A] shrink-0 z-10 overflow-x-auto scrollbar-hide flex-nowrap" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
-          <style>{`
-            .scrollbar-hide::-webkit-scrollbar { display: none; }
-          `}</style>
+        <div className="flex flex-row items-center gap-1 p-[6px_16px] bg-[#111111] border-b border-[#2A2A2A] shrink-0 z-30 relative">
           <div className="flex gap-0.5 shrink-0">
             <button onClick={() => editor.chain().focus().toggleBold().run()} className={`h-[36px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer transition-colors ${editor.isActive('bold') ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}>B</button>
             <button onClick={() => editor.chain().focus().toggleItalic().run()} className={`h-[36px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] italic cursor-pointer transition-colors ${editor.isActive('italic') ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}>I</button>
             <button onClick={() => editor.chain().focus().toggleUnderline().run()} className={`h-[36px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] underline cursor-pointer transition-colors ${editor.isActive('underline') ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}>U</button>
             <button onClick={() => editor.chain().focus().toggleStrike().run()} className={`h-[36px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] line-through cursor-pointer transition-colors ${editor.isActive('strike') ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}>S</button>
           </div>
+          
           <div className="w-[1px] h-[16px] bg-[#2A2A2A] mx-1 shrink-0" />
-          <div className="flex gap-0.5 shrink-0">
-            <button onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={`h-[36px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] font-bold cursor-pointer transition-colors ${editor.isActive('heading', { level: 1 }) ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}>H1</button>
-            <button onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={`h-[36px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] font-bold cursor-pointer transition-colors ${editor.isActive('heading', { level: 2 }) ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}>H2</button>
-            <button onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={`h-[36px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] font-bold cursor-pointer transition-colors ${editor.isActive('heading', { level: 3 }) ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}>H3</button>
-          </div>
-          <div className="w-[1px] h-[16px] bg-[#2A2A2A] mx-1 shrink-0" />
-          <div className="flex gap-0.5 shrink-0">
-            <button onClick={() => editor.chain().focus().setTextAlign('left').run()} className={`h-[36px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer transition-colors ${editor.isActive({ textAlign: 'left' }) ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}>Left</button>
-            <button onClick={() => editor.chain().focus().setTextAlign('center').run()} className={`h-[36px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer transition-colors ${editor.isActive({ textAlign: 'center' }) ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}>Center</button>
-            <button onClick={() => editor.chain().focus().setTextAlign('right').run()} className={`h-[36px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer transition-colors ${editor.isActive({ textAlign: 'right' }) ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}>Right</button>
-          </div>
-          <div className="w-[1px] h-[16px] bg-[#2A2A2A] mx-1 shrink-0" />
-          <div className="flex gap-0.5 shrink-0">
-            <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={`h-[36px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer transition-colors ${editor.isActive('bulletList') ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}>Bul</button>
-            <button onClick={() => editor.chain().focus().toggleOrderedList().run()} className={`h-[36px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer transition-colors ${editor.isActive('orderedList') ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}>Ord</button>
-            <button onClick={() => editor.chain().focus().toggleTaskList().run()} className={`h-[36px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer transition-colors ${editor.isActive('taskList') ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}>Task</button>
-          </div>
-          <div className="w-[1px] h-[16px] bg-[#2A2A2A] mx-1 shrink-0" />
-          <div className="flex gap-0.5 shrink-0">
-            <button onClick={() => editor.chain().focus().toggleBlockquote().run()} className={`h-[36px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer transition-colors ${editor.isActive('blockquote') ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}>Quote</button>
-            <button onClick={() => editor.chain().focus().toggleCodeBlock().run()} className={`h-[36px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer transition-colors ${editor.isActive('codeBlock') ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}>Code</button>
-            <button onClick={() => editor.chain().focus().setHorizontalRule().run()} className={`h-[36px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer text-[#888888] hover:bg-[#1C1C1C] transition-colors`}>—</button>
-          </div>
+          
+          <button 
+            onClick={() => setShowMoreTools(!showMoreTools)}
+            className={`h-[36px] md:h-[28px] px-[10px] rounded flex items-center justify-center cursor-pointer transition-colors ${showMoreTools ? 'bg-[#1C1C1C] text-[#F0F0F0]' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}
+          >
+            <MoreHorizontal className="w-4 h-4" />
+          </button>
+
+          {showMoreTools && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowMoreTools(false)} />
+              <div className="absolute top-full left-4 mt-2 bg-[#1C1C1C] border border-[#2A2A2A] rounded-xl p-2 z-50 shadow-2xl flex flex-col gap-1.5 md:flex-row md:gap-3">
+                <div className="flex gap-0.5 shrink-0 bg-[#111111] p-1 rounded-lg">
+                  <button onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={`h-[32px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] font-bold cursor-pointer transition-colors ${editor.isActive('heading', { level: 1 }) ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#2A2A2A]'}`}>H1</button>
+                  <button onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={`h-[32px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] font-bold cursor-pointer transition-colors ${editor.isActive('heading', { level: 2 }) ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#2A2A2A]'}`}>H2</button>
+                  <button onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={`h-[32px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] font-bold cursor-pointer transition-colors ${editor.isActive('heading', { level: 3 }) ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#2A2A2A]'}`}>H3</button>
+                </div>
+                <div className="flex gap-0.5 shrink-0 bg-[#111111] p-1 rounded-lg">
+                  <button onClick={() => editor.chain().focus().setTextAlign('left').run()} className={`h-[32px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer transition-colors ${editor.isActive({ textAlign: 'left' }) ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#2A2A2A]'}`}>Left</button>
+                  <button onClick={() => editor.chain().focus().setTextAlign('center').run()} className={`h-[32px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer transition-colors ${editor.isActive({ textAlign: 'center' }) ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#2A2A2A]'}`}>Center</button>
+                  <button onClick={() => editor.chain().focus().setTextAlign('right').run()} className={`h-[32px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer transition-colors ${editor.isActive({ textAlign: 'right' }) ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#2A2A2A]'}`}>Right</button>
+                </div>
+                <div className="flex gap-0.5 shrink-0 bg-[#111111] p-1 rounded-lg">
+                  <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={`h-[32px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer transition-colors ${editor.isActive('bulletList') ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#2A2A2A]'}`}>Bul</button>
+                  <button onClick={() => editor.chain().focus().toggleOrderedList().run()} className={`h-[32px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer transition-colors ${editor.isActive('orderedList') ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#2A2A2A]'}`}>Ord</button>
+                  <button onClick={() => editor.chain().focus().toggleTaskList().run()} className={`h-[32px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer transition-colors ${editor.isActive('taskList') ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#2A2A2A]'}`}>Task</button>
+                </div>
+                <div className="flex gap-0.5 shrink-0 bg-[#111111] p-1 rounded-lg">
+                  <button onClick={() => editor.chain().focus().toggleBlockquote().run()} className={`h-[32px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer transition-colors ${editor.isActive('blockquote') ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#2A2A2A]'}`}>Quote</button>
+                  <button onClick={() => editor.chain().focus().toggleCodeBlock().run()} className={`h-[32px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer transition-colors ${editor.isActive('codeBlock') ? 'bg-[rgba(255,107,0,0.12)] text-[#FF6B00]' : 'text-[#888888] hover:bg-[#2A2A2A]'}`}>Code</button>
+                  <button onClick={() => editor.chain().focus().setHorizontalRule().run()} className={`h-[32px] md:h-[28px] px-[10px] md:px-[7px] rounded text-[13px] md:text-[12.5px] cursor-pointer text-[#888888] hover:bg-[#2A2A2A] transition-colors`}>—</button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -467,7 +482,7 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
               .tiptap {
                 line-height: 1.8;
               outline: none;
-              min-height: calc(100vh - 200px);
+              min-height: calc(100vh - 150px);
             }
             .tiptap p.is-editor-empty:first-child::before {
               color: #333333;
