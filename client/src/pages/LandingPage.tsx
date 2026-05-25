@@ -137,8 +137,6 @@ export default function LandingPage() {
         </div>
       </div>
 
-      </div>
-
       {/* Features Section */}
       <div id="features" className="relative z-20 w-full bg-[#050505] border-t border-white/5 flex flex-col items-center py-32 px-6">
         <div className="max-w-6xl w-full">
