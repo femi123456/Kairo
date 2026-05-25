@@ -44,11 +44,11 @@ const COLORS = [
 ];
 
 const ZEN_TRACKS = [
-  { id: 1, title: 'Talking in the rain', artist: 'fourwalls', url: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3', cover: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=100&q=80' },
-  { id: 2, title: 'blurred figures', artist: 'lofi', url: 'https://assets.mixkit.co/active_storage/sfx/135/135-preview.mp3', cover: 'https://images.unsplash.com/photo-1493225457124-a1a2a5f25907?w=100&q=80' },
-  { id: 3, title: 'gloomy nights', artist: 'lofi', url: 'https://assets.mixkit.co/active_storage/sfx/143/143-preview.mp3', cover: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=100&q=80' },
-  { id: 4, title: 'lofi girl', artist: 'lofi', url: 'https://assets.mixkit.co/active_storage/sfx/144/144-preview.mp3', cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&q=80' },
-  { id: 5, title: 'in place dryhope', artist: 'lofi', url: 'https://assets.mixkit.co/active_storage/sfx/145/145-preview.mp3', cover: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=100&q=80' },
+  { id: 1, title: 'Talking in the rain', artist: 'fourwalls', youtubeId: 'ujDe9JvkCVk', cover: 'https://img.youtube.com/vi/ujDe9JvkCVk/hqdefault.jpg' },
+  { id: 2, title: 'blurred figures', artist: 'lofi', youtubeId: 'mD1FkUUtmm8', cover: 'https://img.youtube.com/vi/mD1FkUUtmm8/hqdefault.jpg' },
+  { id: 3, title: 'gloomy nights', artist: 'lofi', youtubeId: 'f0DdrxnYlho', cover: 'https://img.youtube.com/vi/f0DdrxnYlho/hqdefault.jpg' },
+  { id: 4, title: 'lofi girl', artist: 'lofi', youtubeId: 'jfKfPfyJRdk', cover: 'https://img.youtube.com/vi/jfKfPfyJRdk/hqdefault.jpg' },
+  { id: 5, title: 'in place', artist: 'dryhope', youtubeId: 'qNdA_BqYzxk', cover: 'https://img.youtube.com/vi/qNdA_BqYzxk/hqdefault.jpg' },
 ];
 
 export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocketUpdate, clearIncomingUpdate, isTypingRef, onEditorReady, onSelectedTextChange, isZenMode, onToggleZenMode }: EditorProps) {
@@ -64,29 +64,18 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
   const noteRef = useRef<Note | null>(note);
   const prevNoteIdRef = useRef<string | null>(null);
   const [isPlayingAmbient, setIsPlayingAmbient] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const currentTrack = ZEN_TRACKS[currentTrackIndex];
 
-  // Initialize audio
+  // Stop ambient sound when exiting Zen Mode
   useEffect(() => {
-    audioRef.current = new Audio(ZEN_TRACKS[0].url);
-    audioRef.current.loop = true;
-    audioRef.current.volume = 0.5;
-    return () => {
-      audioRef.current?.pause();
-      audioRef.current = null;
-    };
-  }, []);
+    if (!isZenMode && isPlayingAmbient) {
+      setIsPlayingAmbient(false);
+    }
+  }, [isZenMode]);
 
   const toggleAmbientSound = () => {
-    if (isPlayingAmbient) {
-      audioRef.current?.pause();
-      setIsPlayingAmbient(false);
-    } else {
-      audioRef.current?.play().catch(() => toast.error('Browser blocked audio playback'));
-      setIsPlayingAmbient(true);
-    }
+    setIsPlayingAmbient(!isPlayingAmbient);
   };
 
   const nextTrack = (e?: React.MouseEvent) => {
@@ -94,16 +83,6 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
     const nextIdx = (currentTrackIndex + 1) % ZEN_TRACKS.length;
     setCurrentTrackIndex(nextIdx);
   };
-
-  useEffect(() => {
-    if (audioRef.current) {
-      const wasPlaying = isPlayingAmbient;
-      audioRef.current.src = ZEN_TRACKS[currentTrackIndex].url;
-      if (wasPlaying) {
-        audioRef.current.play().catch(() => {});
-      }
-    }
-  }, [currentTrackIndex, isPlayingAmbient]);
 
   // Keep noteRef in sync so the onUpdate callback always has the current note
   noteRef.current = note;
@@ -385,6 +364,19 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
       {/* Floating Zen Controls */}
       {isZenMode && (
         <>
+          {/* Hidden YouTube Audio Player */}
+          {isPlayingAmbient && (
+            <iframe
+              width="0"
+              height="0"
+              src={`https://www.youtube.com/embed/${currentTrack.youtubeId}?autoplay=1&loop=1&playlist=${currentTrack.youtubeId}`}
+              title="YouTube video player"
+              frameBorder="0"
+              allow="autoplay"
+              className="hidden"
+            />
+          )}
+
           {/* Music Player */}
           <div className="absolute bottom-8 right-8 z-[100] flex items-center gap-3 bg-[#1C1C1C]/50 backdrop-blur-xl border border-[rgba(255,255,255,0.05)] rounded-[12px] p-2 pr-4 shadow-2xl transition-all duration-300">
             <button 
