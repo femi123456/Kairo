@@ -13,7 +13,7 @@ export default function PublicNotePage() {
   useEffect(() => {
     const fetchNote = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/notes/public/${shareId}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/notes/public/${shareId}`);
         setNote(response.data.note);
       } catch (err) {
         console.error('Failed to fetch public note:', err);
