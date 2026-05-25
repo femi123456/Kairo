@@ -23,6 +23,7 @@ import { socket } from '../lib/socket';
 interface EditorProps {
   note: Note | null;
   onNoteUpdate: (updatedNote: Note | null) => void;
+  onNoteDelete: (noteId: string) => void;
   incomingSocketUpdate: Note | null;
   clearIncomingUpdate: () => void;
   isTypingRef: React.MutableRefObject<boolean>;
@@ -41,7 +42,7 @@ const COLORS = [
   { id: 'graphite', hex: '#1A1A1A', text: '#F0F0F0' }
 ];
 
-export default function Editor({ note, onNoteUpdate, incomingSocketUpdate, clearIncomingUpdate, isTypingRef, onEditorReady, onSelectedTextChange }: EditorProps) {
+export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocketUpdate, clearIncomingUpdate, isTypingRef, onEditorReady, onSelectedTextChange }: EditorProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [showPalette, setShowPalette] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState<any>(null);
@@ -188,7 +189,7 @@ export default function Editor({ note, onNoteUpdate, incomingSocketUpdate, clear
         await api.delete(`/notes/${note._id}`);
         socket.emit('note-deleted', { userId: note.userId, noteId: note._id });
         toast.success('Note deleted');
-        onNoteUpdate(null);
+        onNoteDelete(note._id);
       } catch (error) {
         console.error('Delete failed:', error);
       }

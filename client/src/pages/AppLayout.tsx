@@ -35,6 +35,11 @@ const AppLayout = () => {
     setNotes(prev => prev.map(n => n._id === updatedNote._id ? updatedNote : n));
   }, []);
 
+  const handleNoteDeleteLocal = useCallback((noteId: string) => {
+    setNotes(prev => prev.filter(n => n._id !== noteId));
+    setSelectedNoteId(prev => prev === noteId ? null : prev);
+  }, []);
+
   useEffect(() => {
     if (!user) return;
 
@@ -159,6 +164,7 @@ const AppLayout = () => {
           <Editor
             note={selectedNote}
             onNoteUpdate={handleNoteUpdate}
+            onNoteDelete={handleNoteDeleteLocal}
             incomingSocketUpdate={incomingSocketUpdate}
             clearIncomingUpdate={() => setIncomingSocketUpdate(null)}
             isTypingRef={isTypingRef}
