@@ -14,7 +14,7 @@ import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
 import Placeholder from '@tiptap/extension-placeholder';
-import { Share2, Palette, Trash2, FileText, X, MoreHorizontal } from 'lucide-react';
+import { Share2, Palette, Trash2, FileText, X, MoreHorizontal, Mic } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Note } from '../types';
 import api from '../lib/axios';
@@ -47,6 +47,8 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
   const [showPalette, setShowPalette] = useState(false);
   const [showMoreTools, setShowMoreTools] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState<any>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef<any>(null);
   const [tagInput, setTagInput] = useState('');
   const [localTitle, setLocalTitle] = useState(note?.title || '');
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -137,6 +139,67 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
     }
     clearIncomingUpdate();
   }, [incomingSocketUpdate, editor]);
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      setIsRecording(false);
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error('Voice recording is not supported in this browser.');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    let fullTranscript = '';
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+      toast('Recording started... Speak now.', { icon: '🎙️' });
+    };
+
+    recognition.onresult = (event: any) => {
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          fullTranscript += event.results[i][0].transcript + ' ';
+        }
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error', event.error);
+      setIsRecording(false);
+      toast.error('Voice recording error: ' + event.error);
+    };
+
+    recognition.onend = async () => {
+      setIsRecording(false);
+      if (fullTranscript.trim()) {
+        const toastId = toast.loading('Formatting voice note...');
+        try {
+          const res = await api.post('/ai/format-voice', { transcript: fullTranscript.trim() });
+          const formatted = res.data.formattedText;
+          if (editor) {
+            editor.commands.insertContent(formatted + '<br/>');
+          }
+          toast.success('Voice note added!', { id: toastId });
+        } catch (error) {
+          console.error(error);
+          toast.error('Failed to format voice note', { id: toastId });
+        }
+      }
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
 
   const handleContentChange = (newTitle: string, newBody: string) => {
     if (!note) return;
@@ -398,6 +461,14 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
           
           <div className="w-[1px] h-[16px] bg-[#2A2A2A] mx-1 shrink-0" />
           
+          <button 
+            onClick={toggleRecording}
+            title="Voice to Text"
+            className={`h-[36px] md:h-[28px] px-[10px] rounded flex items-center justify-center cursor-pointer transition-colors ${isRecording ? 'bg-[#FF3B30] text-white animate-pulse' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}
+          >
+            <Mic className="w-4 h-4" />
+          </button>
+
           <button 
             onClick={() => setShowMoreTools(!showMoreTools)}
             className={`h-[36px] md:h-[28px] px-[10px] rounded flex items-center justify-center cursor-pointer transition-colors ${showMoreTools ? 'bg-[#1C1C1C] text-[#F0F0F0]' : 'text-[#888888] hover:bg-[#1C1C1C]'}`}

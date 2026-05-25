@@ -129,3 +129,46 @@ When they ask to rewrite, improve, or do anything to 'this' or 'it', they mean t
     }
   }
 };
+
+export const formatVoice = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { transcript } = req.body;
+
+    if (!transcript) {
+      res.status(400).json({ message: 'Transcript is required' });
+      return;
+    }
+
+    const systemPrompt = `You are an AI assistant in a note-taking app. Your job is to take raw, unformatted voice dictation from the user and format it into clean, structured Markdown. 
+Rules:
+- Fix grammatical errors and punctuation without changing the intended meaning.
+- Use headers (##, ###) if the text naturally breaks into sections.
+- Use bullet points for lists if the user lists items.
+- Output ONLY the formatted markdown, no conversational filler.`;
+
+    const groqResponse = await axios.post(
+      'https://api.groq.com/openai/v1/chat/completions',
+      {
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: transcript }
+        ],
+        max_tokens: 1500,
+        temperature: 0.3,
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    const formattedText = groqResponse.data.choices?.[0]?.message?.content || '';
+    res.status(200).json({ formattedText });
+  } catch (error) {
+    console.error('Format voice error:', error);
+    res.status(500).json({ message: 'Formatting failed' });
+  }
+};
