@@ -301,12 +301,12 @@ export default function Editor({ note, onNoteUpdate, incomingSocketUpdate, clear
       {/* PAGE STYLE POPOVER */}
       {showPalette && (
         <>
-          {/* Mobile Backdrop */}
+          {/* Backdrop for closing popover when clicking outside */}
           <div 
-            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            className="fixed inset-0 bg-black/50 md:bg-transparent z-40"
             onClick={() => setShowPalette(false)}
           />
-          <div className="fixed md:absolute inset-x-0 bottom-0 md:bottom-auto md:top-[52px] md:right-4 bg-[#111111] md:bg-[#1C1C1C] border-t md:border border-[#2A2A2A] rounded-t-2xl md:rounded-xl p-5 md:p-4 w-full md:w-[260px] z-50 shadow-2xl flex flex-col gap-4">
+          <div className="fixed md:absolute inset-x-0 bottom-0 md:bottom-auto md:top-[52px] md:right-[56px] bg-[#111111] md:bg-[#1C1C1C] border-t md:border border-[#2A2A2A] rounded-t-2xl md:rounded-xl p-5 md:p-4 w-full md:w-[260px] z-50 shadow-2xl flex flex-col gap-4">
             
             {/* Mobile Drag Handle */}
             <div className="md:hidden w-full flex justify-center mb-1 shrink-0">
