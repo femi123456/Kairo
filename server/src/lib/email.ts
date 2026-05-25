@@ -1,23 +1,20 @@
-import { Resend } from 'resend';
+import Mailjet from 'node-mailjet';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const mailjet = Mailjet.apiConnect(
+  process.env.MAILJET_API_KEY!,
+  process.env.MAILJET_SECRET_KEY!
+);
 
 export const sendPasswordResetEmail = async ({ name, email, resetUrl }: { name: string, email: string, resetUrl: string }) => {
-  if (!process.env.RESEND_API_KEY) {
-    console.error('RESEND_API_KEY is not set');
+  if (!process.env.MAILJET_API_KEY || !process.env.MAILJET_SECRET_KEY) {
+    console.error('Mailjet credentials not set');
     return;
   }
-  console.log('RESEND_API_KEY present:', process.env.RESEND_API_KEY.slice(0, 8) + '...');
 
-  try {
-    const data = await resend.emails.send({
-      from: 'onboarding@resend.dev',
-      to: email,
-      subject: 'Reset your Kairo password',
-      html: `
+  const htmlTemplate = `
         <div style="background-color: #0A0A0A; font-family: 'Inter', Helvetica, Arial, sans-serif; padding: 40px 0; margin: 0; width: 100%;">
           <div style="max-width: 480px; margin: 0 auto; padding: 40px; background-color: #0A0A0A;">
             <div style="font-size: 24px; font-weight: 700; margin-bottom: 30px; font-family: 'Georgia', serif;">
@@ -36,10 +33,30 @@ export const sendPasswordResetEmail = async ({ name, email, resetUrl }: { name: 
             </p>
           </div>
         </div>
-      `
+      `;
+
+  try {
+    await mailjet.post('send', { version: 'v3.1' }).request({
+      Messages: [
+        {
+          From: {
+            Email: process.env.MAIL_FROM,
+            Name: 'Kairo'
+          },
+          To: [
+            {
+              Email: email,
+              Name: name
+            }
+          ],
+          Subject: 'Reset your Kairo password',
+          HTMLPart: htmlTemplate
+        }
+      ]
     });
-    console.log('Resend response:', data);
+    console.log('Email sent to:', email);
   } catch (error) {
-    console.error('Resend error:', error);
+    console.error('Mailjet error:', error);
+    throw error;
   }
 };
