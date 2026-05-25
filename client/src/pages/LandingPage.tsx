@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Link } from 'react-router-dom';
 import { Sparkles, Zap, Lock, Shield, ArrowRight } from 'lucide-react';
 
