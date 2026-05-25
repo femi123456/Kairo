@@ -5,6 +5,8 @@ export interface IUser {
   name: string;
   email: string;
   password: string;
+  resetToken?: string;
+  resetTokenExpiry?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,6 +30,12 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: true,
       minLength: 6,
+    },
+    resetToken: {
+      type: String,
+    },
+    resetTokenExpiry: {
+      type: Date,
     },
   },
   { timestamps: true }

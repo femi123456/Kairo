@@ -37,6 +37,7 @@ function App() {
   return (
     <Routes>
       <Route path="/auth" element={<AuthPage />} />
+      <Route path="/reset-password" element={<AuthPage />} />
       <Route path="/note/:shareId" element={<PublicNotePage />} />
       <Route 
         path="/app/*" 
