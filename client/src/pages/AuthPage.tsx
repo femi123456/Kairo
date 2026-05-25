@@ -27,6 +27,8 @@ const AuthPage = () => {
     if (token || isResetPath) {
       setMode('reset');
       if (token) setResetToken(token);
+    } else if (searchParams.get('mode') === 'signup') {
+      setMode('signup');
     }
   }, [searchParams, location.pathname]);
 

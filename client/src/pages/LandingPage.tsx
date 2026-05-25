@@ -18,16 +18,11 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="hidden md:flex items-center gap-8 text-[14px] text-[#A0A0A0] font-medium">
-          <a href="#" className="hover:text-white transition-colors">Product</a>
-          <a href="#" className="hover:text-white transition-colors">FAQs</a>
-          <a href="#" className="hover:text-white transition-colors">Community</a>
-          <a href="#" className="hover:text-white transition-colors">Contact</a>
-        </div>
+
 
         <div className="flex items-center gap-6">
-          <Link to="/auth" className="hidden md:block text-[#A0A0A0] text-[14px] hover:text-white transition-colors">
-            Current Customer?
+          <Link to="/auth?mode=signup" className="hidden md:block text-[#A0A0A0] text-[14px] hover:text-white transition-colors">
+            New writer?
           </Link>
           <Link 
             to="/auth" 
@@ -110,13 +105,7 @@ export default function LandingPage() {
         </Link>
       </div>
 
-      {/* Right side navigation dots */}
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-50 hidden md:flex">
-        <div className="w-[3px] h-[16px] bg-[#FF6B00] rounded-full" />
-        <div className="w-[3px] h-[16px] bg-white/20 rounded-full" />
-        <div className="w-[3px] h-[16px] bg-white/20 rounded-full" />
-        <div className="w-[3px] h-[16px] bg-white/20 rounded-full" />
-      </div>
+
 
     </div>
   );
