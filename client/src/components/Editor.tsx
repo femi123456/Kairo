@@ -253,15 +253,7 @@ export default function Editor({ note, onNoteUpdate, incomingSocketUpdate, clear
   const isLightPage = !['default', 'dark', 'graphite'].includes(currentColor.id);
   const textColor = currentColor.text;
   
-  let bgImage = 'none';
-  const lineStr = isLightPage ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)';
-  if (note.paperStyle === 'lined') {
-    bgImage = `repeating-linear-gradient(transparent, transparent 27px, ${lineStr} 27px, ${lineStr} 28px)`;
-  } else if (note.paperStyle === 'grid') {
-    bgImage = `repeating-linear-gradient(transparent, transparent 27px, ${lineStr} 27px, ${lineStr} 28px), repeating-linear-gradient(90deg, transparent, transparent 27px, ${lineStr} 27px, ${lineStr} 28px)`;
-  } else if (note.paperStyle === 'dotted') {
-    bgImage = `radial-gradient(${lineStr} 1px, transparent 1px)`;
-  }
+
 
   const fontFamilyMap: Record<string, string> = {
     sans: "'Inter', sans-serif",
@@ -335,20 +327,7 @@ export default function Editor({ note, onNoteUpdate, incomingSocketUpdate, clear
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <span className="text-[11px] uppercase text-[#888888] font-semibold tracking-wider">Paper Style</span>
-            <div className="grid grid-cols-4 gap-2">
-              {['blank', 'lined', 'grid', 'dotted'].map(style => (
-                <div 
-                  key={style}
-                  onClick={() => updateNoteProperty({ paperStyle: style })}
-                  className={`flex flex-col items-center gap-1 p-2 rounded-lg cursor-pointer border ${note.paperStyle === style ? 'border-[#FF6B00] bg-[rgba(255,107,0,0.05)]' : 'border-[#2A2A2A] hover:border-[#444444]'}`}
-                >
-                  <div className="text-[10px] capitalize text-[#888888]">{style}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+
 
           <div className="flex flex-col gap-2">
             <span className="text-[11px] uppercase text-[#888888] font-semibold tracking-wider">Font</span>
@@ -465,7 +444,7 @@ export default function Editor({ note, onNoteUpdate, incomingSocketUpdate, clear
       {/* NOTE BODY */}
       <div 
         className="flex-1 overflow-y-auto"
-        style={{ backgroundColor: currentColor.hex, backgroundImage: bgImage, backgroundSize: note.paperStyle === 'dotted' ? '14px 14px' : 'auto' }}
+        style={{ backgroundColor: currentColor.hex }}
         onClick={() => editor?.commands.focus()}
       >
         <div className="mx-auto w-full p-[16px] md:p-[24px_32px]">
@@ -527,7 +506,7 @@ export default function Editor({ note, onNoteUpdate, incomingSocketUpdate, clear
               </button>
             </div>
             <div className="p-6 overflow-y-auto flex-1 text-[#F0F0F0] text-[15px] leading-[1.8] font-['Inter'] tiptap-preview" 
-                 style={{ backgroundColor: currentColor.hex, backgroundImage: bgImage, color: textColor }}
+                 style={{ backgroundColor: currentColor.hex, color: textColor }}
                  dangerouslySetInnerHTML={{ __html: showHistoryModal.body }} />
             <div className="p-4 border-t border-[#2A2A2A] bg-[#1C1C1C] flex justify-end gap-3">
               <button 

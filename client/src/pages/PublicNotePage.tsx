@@ -63,12 +63,7 @@ export default function PublicNotePage() {
   const isLightBackground = note.pageColor === '#E6E1D8';
   const titleColor = isLightBackground ? '#111111' : '#F0F0F0';
 
-  const paperStyleClasses: Record<string, string> = {
-    dots: 'bg-[radial-gradient(#444444_1px,transparent_1px)] [background-size:20px_20px]',
-    lines: 'bg-[linear-gradient(transparent_23px,#444444_24px)] [background-size:100%_24px]',
-    grid: 'bg-[linear-gradient(#444444_1px,transparent_1px),linear-gradient(90deg,#444444_1px,transparent_1px)] [background-size:20px_20px]',
-    none: ''
-  };
+
 
   const getFontClass = (font?: string) => {
     switch (font) {
@@ -80,7 +75,7 @@ export default function PublicNotePage() {
 
   return (
     <div 
-      className={`min-h-screen w-full selection:bg-[#FF6B00] selection:text-white ${paperStyleClasses[note.paperStyle || 'none']}`}
+      className={`min-h-screen w-full selection:bg-[#FF6B00] selection:text-white`}
       style={{ backgroundColor: note.pageColor || '#1A1A1A' }}
     >
       <div className="max-w-[720px] mx-auto px-8 py-12 flex flex-col min-h-screen">
