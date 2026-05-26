@@ -653,10 +653,14 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
               }
               .tiptap {
                 line-height: 1.8;
-              outline: none;
-              min-height: calc(100vh - 150px);
-            }
-            .tiptap p.is-editor-empty:first-child::before {
+                outline: none;
+                min-height: calc(100vh - 150px);
+                word-wrap: break-word;
+                word-break: break-word;
+                overflow-wrap: break-word;
+                white-space: pre-wrap;
+              }
+              .tiptap p.is-editor-empty:first-child::before {
               color: #333333;
               content: attr(data-placeholder);
               float: left;
