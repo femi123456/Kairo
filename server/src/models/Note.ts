@@ -11,7 +11,7 @@ export interface INote {
   fontFamily: string;
   noteWidth: string;
   isPublic: boolean;
-  shareId: string | null;
+  shareId?: string | null;
   versions: { body: string; savedAt: Date }[];
   createdAt: Date;
   updatedAt: Date;
