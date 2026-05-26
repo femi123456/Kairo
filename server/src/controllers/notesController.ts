@@ -105,7 +105,7 @@ export const toggleShare = async (req: AuthRequest, res: Response): Promise<void
       res.status(200).json({ note, shareUrl });
     } else {
       note.isPublic = false;
-      note.shareId = null;
+      note.shareId = undefined;
       await note.save();
       
       res.status(200).json({ note });

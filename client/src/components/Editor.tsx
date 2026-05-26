@@ -301,6 +301,8 @@ export default function Editor({ note, onNoteUpdate, onNoteDelete, incomingSocke
       if (updatedNote.isPublic && shareUrl) {
         navigator.clipboard.writeText(shareUrl);
         toast.success('Link copied to clipboard');
+      } else {
+        toast.success('Note unshared successfully');
       }
     } catch (error) {
       console.error('Share failed:', error);
