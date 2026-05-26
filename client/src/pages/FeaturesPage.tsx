@@ -47,11 +47,14 @@ function FeatureItem({ feature, index, progress }: { feature: typeof FEATURES[0]
   const end = (index + 1) / 6;
   const center = (start + end) / 2;
 
-  // Widen the visible range slightly for smooth overlaps
-  const opacity = useTransform(progress, [start - 0.05, center, end + 0.05], [0, 1, 0]);
-  const scale = useTransform(progress, [start - 0.05, center, end + 0.05], [0.8, 1, 0.8]);
-  const y = useTransform(progress, [start - 0.05, center, end + 0.05], [100, 0, -100]);
-  const textY = useTransform(progress, [start - 0.05, center, end + 0.05], [50, 0, -50]);
+  const p1 = Math.max(0, start - 0.05);
+  const p2 = center;
+  const p3 = Math.min(1, end + 0.05);
+
+  const opacity = useTransform(progress, [p1, p2, p3], [0, 1, 0]);
+  const scale = useTransform(progress, [p1, p2, p3], [0.8, 1, 0.8]);
+  const y = useTransform(progress, [p1, p2, p3], [100, 0, -100]);
+  const textY = useTransform(progress, [p1, p2, p3], [50, 0, -50]);
 
   return (
     <motion.div 
