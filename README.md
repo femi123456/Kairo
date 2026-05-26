@@ -7,47 +7,14 @@ Kairo is a collaborative, real-time workspace and note-taking application featur
 - **Backend**: Node.js, Express, TypeScript, MongoDB (Mongoose), Socket.io, JWT Authentication
 - **AI Integration**: Groq API (Llama 3.3) for the Kairo AI assistant
 
-## Local Setup
+## Features
+- **Real-time Collaboration**: Write and organize notes simultaneously with others using Socket.io and Tiptap.
+- **AI Assistant**: Supercharge your writing with Groq API (Llama 3.3) integration for intelligent text generation and assistance.
+- **Public Note Sharing**: Easily share your notes publicly via unique URLs.
+- **Secure Authentication & Password Recovery**: JWT-based authentication with email-based password resets via Mailjet.
 
-### 1. Clone the repository
-```bash
-git clone <repository-url>
-cd Kairo
-```
-
-### 2. Server Setup
-```bash
-cd server
-npm install
-cp .env.example .env
-```
-Fill in the environment variables in `server/.env`:
-- `PORT`: 8000
-- `MONGODB_URI`: Your MongoDB connection string
-- `JWT_SECRET`: A secret string for signing JWT tokens
-- `GROQ_API_KEY`: Your Groq API key for the AI assistant
-- `CLIENT_URL`: http://localhost:5173 (for CORS)
-
-Start the server:
-```bash
-npm run dev
-```
-
-### 3. Client Setup
-Open a new terminal:
-```bash
-cd client
-npm install
-cp .env.example .env
-```
-Fill in the environment variables in `client/.env`:
-- `VITE_API_URL`: http://localhost:8000/api
-- `VITE_SOCKET_URL`: http://localhost:8000
-
-Start the client:
-```bash
-npm run dev
-```
+## Testing / Live URL
+The application is deployed and ready for testing. Please test the application using the provided live URL, as local hosting instructions have been omitted for this phase.
 
 ## Deployment
 
