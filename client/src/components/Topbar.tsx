@@ -1,4 +1,4 @@
-import { Sparkles, LogOut, ArrowLeft } from 'lucide-react';
+import { Sparkles, LogOut, ArrowLeft, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import type { Note } from '../types';
 
@@ -7,9 +7,11 @@ interface TopbarProps {
   isAIOpen: boolean;
   onToggleAI: () => void;
   onBack?: () => void;
+  isSidebarOpen?: boolean;
+  onToggleSidebar?: () => void;
 }
 
-export default function Topbar({ selectedNote, isAIOpen, onToggleAI, onBack }: TopbarProps) {
+export default function Topbar({ selectedNote, isAIOpen, onToggleAI, onBack, isSidebarOpen, onToggleSidebar }: TopbarProps) {
   const { user, logout } = useAuth();
 
   const getInitials = (name?: string) => {
@@ -20,6 +22,15 @@ export default function Topbar({ selectedNote, isAIOpen, onToggleAI, onBack }: T
   return (
     <div className="h-[46px] bg-[#0A0A0A] border-b border-[#2A2A2A] flex flex-row items-center justify-between px-2 md:px-4 shrink-0">
       <div className="flex-1 overflow-hidden pr-2 md:pr-4 flex items-center gap-2">
+        {onToggleSidebar && (
+          <button
+            onClick={onToggleSidebar}
+            className="hidden md:flex w-[32px] h-[32px] rounded-md items-center justify-center text-[#888888] hover:bg-[#1C1C1C] transition-colors cursor-pointer shrink-0"
+            title={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+          >
+            {isSidebarOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
+          </button>
+        )}
         {onBack && (
           <button 
             onClick={onBack}

@@ -15,6 +15,7 @@ const AppLayout = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [isZenMode, setIsZenMode] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [mobileView, setMobileView] = useState<'list' | 'editor'>('list');
   const [incomingSocketUpdate, setIncomingSocketUpdate] = useState<Note | null>(null);
   const [editorInstance, setEditorInstance] = useState<any>(null);
@@ -143,7 +144,7 @@ const AppLayout = () => {
 
   return (
     <div className="flex flex-row h-screen w-screen overflow-hidden font-['Inter']">
-      {!isZenMode && (
+      {!isZenMode && isSidebarOpen && (
         <div className={`h-full shrink-0 ${mobileView === 'list' ? 'block w-full' : 'hidden'} md:block md:w-[268px]`}>
           <Sidebar
             notes={notes}
@@ -164,6 +165,8 @@ const AppLayout = () => {
             isAIOpen={isAiOpen}
             onToggleAI={() => setIsAiOpen(!isAiOpen)}
             onBack={() => setMobileView('list')}
+            isSidebarOpen={isSidebarOpen}
+            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           />
         )}
         <div className="flex-1 flex flex-row overflow-hidden">
