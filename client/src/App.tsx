@@ -5,6 +5,7 @@ import AuthPage from './pages/AuthPage';
 import AppLayout from './pages/AppLayout';
 import PublicNotePage from './pages/PublicNotePage';
 import LandingPage from './pages/LandingPage';
+import FeaturesPage from './pages/FeaturesPage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
@@ -49,6 +50,7 @@ function App() {
         } 
       />
       <Route path="/" element={<LandingPage />} />
+      <Route path="/features" element={<FeaturesPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
