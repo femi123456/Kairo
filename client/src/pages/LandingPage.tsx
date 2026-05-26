@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, Zap, Lock, Shield, ArrowRight } from 'lucide-react';
+import { Sparkles, Zap, Lock, Shield, ArrowRight, Menu, X } from 'lucide-react';
 import { motion, useScroll, useTransform, useMotionTemplate } from 'framer-motion';
 
 export default function LandingPage() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { scrollY } = useScroll();
   const heroOpacity = useTransform(scrollY, [0, 400], [1, 0]);
   const heroScale = useTransform(scrollY, [0, 400], [1, 0.95]);
@@ -31,7 +33,7 @@ export default function LandingPage() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#FF6B00] rounded-full blur-[150px] opacity-[0.07] pointer-events-none" />
 
           {/* Navbar */}
-          <nav className="relative z-[100] flex items-center justify-between px-6 py-6 max-w-7xl mx-auto w-full">
+          <nav className="relative z-[1000] flex items-center justify-between px-6 py-6 max-w-7xl mx-auto w-full">
             <div className="flex items-center gap-1">
               <div className="font-['Arial_Black',sans-serif] text-[24px] leading-none tracking-widest uppercase">
                 <span className="text-white">KAI</span>
@@ -39,11 +41,12 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-6">
-              <Link to="/features" className="hidden md:block text-[#A0A0A0] text-[14px] hover:text-white transition-colors">
+            {/* Desktop Nav */}
+            <div className="hidden md:flex items-center gap-6">
+              <Link to="/features" className="text-[#A0A0A0] text-[14px] hover:text-white transition-colors">
                 Features
               </Link>
-              <Link to="/auth?mode=signup" className="hidden md:block text-[#A0A0A0] text-[14px] hover:text-white transition-colors">
+              <Link to="/auth?mode=signup" className="text-[#A0A0A0] text-[14px] hover:text-white transition-colors">
                 New writer?
               </Link>
               <Link 
@@ -53,7 +56,34 @@ export default function LandingPage() {
                 Go to App <ArrowRight size={16} />
               </Link>
             </div>
+
+            {/* Mobile Hamburger Button */}
+            <button 
+              className="md:hidden text-white p-2 z-[1000]" 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+            </button>
           </nav>
+
+          {/* Mobile Menu Overlay */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden fixed top-[80px] left-0 w-full h-[calc(100vh-80px)] bg-[#050505]/95 backdrop-blur-xl z-[900] flex flex-col items-center justify-center gap-8">
+              <Link to="/features" onClick={() => setIsMobileMenuOpen(false)} className="text-white text-3xl font-semibold tracking-tight">
+                Features
+              </Link>
+              <Link to="/auth?mode=signup" onClick={() => setIsMobileMenuOpen(false)} className="text-white text-3xl font-semibold tracking-tight">
+                New writer?
+              </Link>
+              <Link 
+                to="/auth" 
+                onClick={() => setIsMobileMenuOpen(false)} 
+                className="flex items-center gap-2 bg-[#FF6B00] hover:bg-[#FF8C2A] text-white px-8 py-4 rounded-full text-xl font-bold transition-all shadow-[0_10px_20px_rgba(255,107,0,0.3)]"
+              >
+                Go to App <ArrowRight size={20} />
+              </Link>
+            </div>
+          )}
 
           {/* Hero Content */}
           <div className="flex-1 w-full relative flex flex-col items-center justify-center pb-20 px-4 text-center">

@@ -1,7 +1,7 @@
-import { useRef } from 'react';
+import { useState, useRef } from 'react';
 import { motion, useScroll, useTransform, useMotionTemplate } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Menu, X } from 'lucide-react';
 
 const FEATURES = [
   {
@@ -152,6 +152,8 @@ function FeatureSection({ feature, index, isLast }: { feature: typeof FEATURES[0
 }
 
 export default function FeaturesPage() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   return (
     <div className="bg-[#050505] text-white font-['Inter'] relative selection:bg-[#FF6B00] selection:text-white">
       
@@ -163,12 +165,47 @@ export default function FeaturesPage() {
             <span className="text-[#FF6B00]">RO</span>
           </div>
         </Link>
-        <div className="flex items-center gap-6">
-          <Link to="/auth" className="flex items-center gap-2 bg-[#FF6B00] hover:bg-[#FF8C2A] text-white px-5 py-2.5 rounded-full text-[14px] font-semibold transition-colors">
+        
+        {/* Desktop Nav */}
+        <div className="hidden md:flex items-center gap-6">
+          <Link to="/auth?mode=signup" className="text-[#A0A0A0] text-[14px] hover:text-white transition-colors">
+            New writer?
+          </Link>
+          <Link 
+            to="/auth" 
+            className="flex items-center gap-2 bg-[#FF6B00] hover:bg-[#FF8C2A] text-white px-5 py-2.5 rounded-full text-[14px] font-semibold transition-colors"
+          >
             Go to App <ArrowRight size={16} />
           </Link>
         </div>
+
+        {/* Mobile Hamburger Button */}
+        <button 
+          className="md:hidden text-white p-2" 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+        </button>
       </nav>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden fixed top-[80px] left-0 w-full h-[calc(100vh-80px)] bg-[#050505]/95 backdrop-blur-xl z-[900] flex flex-col items-center justify-center gap-8">
+          <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="text-white text-3xl font-semibold tracking-tight">
+            Home
+          </Link>
+          <Link to="/auth?mode=signup" onClick={() => setIsMobileMenuOpen(false)} className="text-white text-3xl font-semibold tracking-tight">
+            New writer?
+          </Link>
+          <Link 
+            to="/auth" 
+            onClick={() => setIsMobileMenuOpen(false)} 
+            className="flex items-center gap-2 bg-[#FF6B00] hover:bg-[#FF8C2A] text-white px-8 py-4 rounded-full text-xl font-bold transition-all shadow-[0_10px_20px_rgba(255,107,0,0.3)]"
+          >
+            Go to App <ArrowRight size={20} />
+          </Link>
+        </div>
+      )}
 
       {/* Stacked Parallax Feature Sections */}
       <div className="relative w-full">
