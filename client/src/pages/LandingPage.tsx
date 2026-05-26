@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Sparkles, Zap, Lock, Shield, ArrowRight, Mic, Bot, Focus, Share2 } from 'lucide-react';
+import { Sparkles, Zap, Lock, Shield, ArrowRight } from 'lucide-react';
 import { motion, useScroll, useTransform, useMotionTemplate } from 'framer-motion';
 
 export default function LandingPage() {
